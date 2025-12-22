@@ -1,0 +1,40 @@
+{
+  "name": "restate-ts-template",
+  "version": "0.0.1",
+  "description": "Template for JavaScript/TypeScript services running with Restate (https://github.com/restatedev/) ",
+  "main": "app.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc --noEmitOnError",
+    "start": "bun ./src/app.ts",
+    "dev": "bun --watch ./src/app.ts"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.13.0",
+    "@azure/storage-blob": "^12.29.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@restatedev/restate-sdk": "^1.9.1",
+    "@restatedev/restate-sdk-zod": "^1.9.1",
+    "@types/express": "^5.0.6",
+    "@types/nodemailer": "^7.0.4",
+    "@types/oracledb": "^6.10.0",
+    "@types/pg": "^8.15.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "liquidjs": "^10.24.0",
+    "nodemailer": "^7.0.11",
+    "oracledb": "^6.10.0",
+    "pg": "^8.16.3",
+    "pg-promise": "^12.3.0",
+    "puppeteer": "^24.33.0",
+    "uuid": "^13.0.0",
+    "xlsx": "^0.18.5",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "esbuild": "^0.25.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.4.5"
+  }
+}

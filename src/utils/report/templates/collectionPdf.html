@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .title {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .subtitle {
+        font-size: 14px;
+        color: #666;
+      }
+      .info-table {
+        width: 100%;
+        margin: 20px 0;
+      }
+      .info-table td {
+        padding: 8px;
+      }
+      .label {
+        font-weight: bold;
+        width: 150px;
+      }
+      .payment-info {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .payment-info h3 {
+        margin-top: 0;
+      }
+      .virtual-account {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2563eb;
+        letter-spacing: 2px;
+      }
+      .footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+        font-size: 12px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="title">COLLECTION NOTICE</div>
+      <div class="subtitle">Statement of Account</div>
+    </div>
+
+    <table class="info-table">
+      <tr>
+        <td class="label">Customer ID:</td>
+        <td>{{ customerId }}</td>
+      </tr>
+      <tr>
+        <td class="label">Customer Name:</td>
+        <td>{{ customerName }}</td>
+      </tr>
+      <tr>
+        <td class="label">Statement Date:</td>
+        <td>{{ statementDate }}</td>
+      </tr>
+    </table>
+
+    <div class="payment-info">
+      <h3>Payment Information</h3>
+      <p>Please make payment to the following Virtual Account:</p>
+      <p class="virtual-account">{{ virtualAccount }}</p>
+    </div>
+
+    <div class="footer">
+      <p>This is a computer-generated document. No signature is required.</p>
+      <p>For inquiries, please contact our Finance Department.</p>
+    </div>
+  </body>
+</html>
