@@ -1,8 +1,66 @@
-# Dokumentasi SOA Workflow - Restate
+# FinanceRestate - SOA Workflow
+
+Sistem otomatis untuk memproses dan mengirimkan **Statement of Account (SOA)** kepada customer menggunakan **Restate SDK** dengan fitur **durable execution**, **checkpointing**, dan **automatic retry**.
+
+## Prerequisites
+
+- Node.js >= 18
+- Docker (untuk Restate Server)
+- Oracle Database
+- Azure Blob Storage Account
+- Microsoft 365 (untuk Graph API email)
+- Jasper Report Server
+
+## Installation
+
+```bash
+# Clone repository
+git clone git@github.com:tob-david/FinanceRestate.git
+cd FinanceRestate
+
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+## Environment Variables
+
+| Variable                          | Description                   |
+| --------------------------------- | ----------------------------- |
+| `DB_USER`                         | Oracle database username      |
+| `DB_PASSWORD`                     | Oracle database password      |
+| `DB_CONNECTION_STRING`            | Oracle connection string      |
+| `AZURE_STORAGE_CONNECTION_STRING` | Azure Blob Storage connection |
+| `AZURE_STORAGE_CONTAINER_NAME`    | Container name for files      |
+| `AZURE_TENANT_ID`                 | Azure AD tenant ID            |
+| `AZURE_CLIENT_ID`                 | Azure AD app client ID        |
+| `AZURE_CLIENT_SECRET`             | Azure AD app client secret    |
+| `EMAIL_SENDER`                    | Sender email address          |
+| `JASPER_URL`                      | Jasper Report Server URL      |
+| `JASPER_USERNAME`                 | Jasper username               |
+| `JASPER_PASSWORD`                 | Jasper password               |
+
+## Running the Application
+
+```bash
+# Start Restate Server (Docker)
+docker run --name restate_dev --rm -p 8080:8080 -p 9070:9070 -p 9071:9071 --add-host=host.docker.internal:host-gateway docker.io/restatedev/restate:1.1
+
+# Start the application (in another terminal)
+npm run dev
+
+# Register the service
+npx restate deployments register http://host.docker.internal:9080
+```
+
+---
 
 ## Deskripsi Umum
 
-SOA (Statement of Account) Workflow adalah sistem otomatis untuk memproses dan mengirimkan Statement of Account kepada customer. Workflow ini dibangun menggunakan **Restate SDK** yang menyediakan fitur **durable execution**, **checkpointing**, dan **automatic retry**.
+SOA (Statement of Account) Workflow adalah sistem otomatis untuk memproses dan mengirimkan Statement of Account kepada customer.
 
 ## Komponen Utama
 
@@ -127,15 +185,16 @@ enum SoaProcessingType {
 
 ### CustomerModel
 
-````typescript
+```typescript
 interface CustomerModel {
   code: string;
   fullName: string;
   actingCode: string; // DIC, DIP, DIG, DID = Multi-branch
   email?: string;
 }
+```
 
-Multi-branch codes: `["DIC", "DIP", "DIG", "DID"]`
+> **Multi-branch codes**: `["DIC", "DIP", "DIG", "DID"]`
 
 ### Retry Configuration
 
@@ -193,7 +252,7 @@ Setelah semua customer diproses:
 curl -X POST http://localhost:8080/SoaWorkflow/run \
   -H "Content-Type: application/json" \
   -d '{"type": "SOA", "testMode": true}'
-````
+```
 
 ### Input Parameters
 
