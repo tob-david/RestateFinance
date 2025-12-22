@@ -9,7 +9,7 @@ Sistem otomatis untuk memproses dan mengirimkan **Statement of Account (SOA)** k
 - Oracle Database
 - Azure Blob Storage Account
 - Microsoft 365 (untuk Graph API email)
-- Jasper Report Server
+- puppeteer
 
 ## Installation
 
@@ -25,23 +25,6 @@ npm install
 cp .env.example .env
 # Edit .env with your configuration
 ```
-
-## Environment Variables
-
-| Variable                          | Description                   |
-| --------------------------------- | ----------------------------- |
-| `DB_USER`                         | Oracle database username      |
-| `DB_PASSWORD`                     | Oracle database password      |
-| `DB_CONNECTION_STRING`            | Oracle connection string      |
-| `AZURE_STORAGE_CONNECTION_STRING` | Azure Blob Storage connection |
-| `AZURE_STORAGE_CONTAINER_NAME`    | Container name for files      |
-| `AZURE_TENANT_ID`                 | Azure AD tenant ID            |
-| `AZURE_CLIENT_ID`                 | Azure AD app client ID        |
-| `AZURE_CLIENT_SECRET`             | Azure AD app client secret    |
-| `EMAIL_SENDER`                    | Sender email address          |
-| `JASPER_URL`                      | Jasper Report Server URL      |
-| `JASPER_USERNAME`                 | Jasper username               |
-| `JASPER_PASSWORD`                 | Jasper password               |
 
 ## Running the Application
 
@@ -111,8 +94,8 @@ SOA (Statement of Account) Workflow adalah sistem otomatis untuk memproses dan m
 2. **Filter by Aging** - Hanya ambil yang aging >= 60 hari
 3. **Extract DC Notes** - Ambil list DC Note dari SOA data
 4. **Filter Processed** - Skip DC Notes yang sudah pernah diproses
-5. **Generate Excel** - Buat file Excel dari Jasper Server
-6. **Generate PDF** - Buat file Collection PDF dari Jasper Server
+5. **Generate Excel** - Buat file Excel dari Puppeteer
+6. **Generate PDF** - Buat file Collection PDF dari Puppeteer
 7. **Upload to Azure** - Upload kedua file ke Azure Blob Storage
 
 ### Processing Phases
