@@ -1,12 +1,12 @@
 import { executeQuery } from "../config";
-import { CustomerModel } from "../../utils/types/soa";
+import { ICustomerModel } from "../../utils/types";
 
 /**
  * Find all accounts (customers with IS_CUSTOMER = 'N')
  */
 export const findAllAccounts = async () => {
   const sQuery = await executeQuery(
-    `SELECT CM_CODE, CM_NAME FROM MASTER_CM WHERE IS_CUSTOMER = 'N' AND ROWNUM <= 5`
+    `SELECT CM_CODE AS "cm_code", CM_NAME AS "cm_name" FROM MASTER_CM WHERE IS_CUSTOMER = 'N' AND ROWNUM <= 5`
   );
 
   return sQuery;
@@ -17,11 +17,11 @@ export const findAllAccounts = async () => {
  */
 export const findCustomerById = async (
   customerId: string
-): Promise<CustomerModel | null> => {
+): Promise<ICustomerModel | null> => {
   const sQuery = `SELECT CM_CODE AS "code", CM_FULLNAME AS "fullName", ACTING_CODE AS "actingCode", EMAIL AS "email"
                FROM MASTER_CM WHERE CM_CODE = :customerId`;
   const result = await executeQuery(sQuery, { customerId });
-  return (result.rows?.[0] as CustomerModel) ?? null;
+  return (result.rows?.[0] as ICustomerModel) ?? null;
 };
 
 /**

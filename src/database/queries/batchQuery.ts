@@ -24,8 +24,8 @@ export const insertBatch = async (
 export const findBatchStatus = async (batchId: string) => {
   const sql = `
     SELECT TOTAL_CUSTOMERS,
-           PROCESSED_CUSTOMERS,
-           FAILED_CUSTOMERS
+           PROCESSED_CUSTOMERS AS processed_customers,
+           FAILED_CUSTOMERS AS failed_customers
     FROM SOA_PROCESSING_BATCHES
     WHERE BATCH_ID = hextoraw(:batchId)
   `;
