@@ -1,13 +1,13 @@
 import { getBrowser } from "./browserManager";
 import { renderTemplate } from "./templateEngine";
-import { ReportOptions } from "../types/report";
+import { IReportOptions } from "../types/report";
 
 /**
  * Generate PDF from HTML string
  */
 export async function generatePdfFromHtml(
   html: string,
-  options?: ReportOptions
+  options?: IReportOptions
 ): Promise<Buffer> {
   const browser = await getBrowser();
   let page;
@@ -46,7 +46,7 @@ export async function generatePdfFromHtml(
 export async function generatePdf(
   template: string,
   data: Record<string, any>,
-  options?: ReportOptions
+  options?: IReportOptions
 ): Promise<Buffer> {
   const html = await renderTemplate(template, data);
   return generatePdfFromHtml(html, options);

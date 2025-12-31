@@ -4,7 +4,7 @@ import { join } from "path";
 import { generateExcel } from "./excelGenerator";
 import { generatePdfFromHtml } from "./pdfGenerator";
 import { renderTemplate } from "./templateEngine";
-import { ExcelColumn, SoaFileResult } from "../types/report";
+import { IExcelColumn, ISoaFileResult } from "../types/report";
 import { CONTENT_TYPES } from "./constants";
 
 const TEMPLATES_DIR = join(__dirname, "templates");
@@ -24,12 +24,12 @@ export async function generateSoaExcel(
   toDate: number,
   branch: string,
   classOfBusiness: string
-): Promise<SoaFileResult> {
+): Promise<ISoaFileResult> {
   const dateStr = new Date(toDate * 1000).toISOString().split("T")[0];
   const fileName = `SOA_${customerId}_${dateStr}.xlsx`;
 
   // Define SOA columns
-  const columns: ExcelColumn[] = [
+  const columns: IExcelColumn[] = [
     { header: "No", key: "no", width: 5 },
     { header: "Policy No", key: "policyNo", width: 20 },
     { header: "Insured Name", key: "insuredName", width: 30 },
@@ -67,7 +67,7 @@ export async function generateCollectionPdf(
   customerName: string,
   statementDate: string,
   virtualAccount: string
-): Promise<SoaFileResult> {
+): Promise<ISoaFileResult> {
   const fileName = `Collection_${customerId}_${statementDate}.pdf`;
 
   const template = loadTemplate("collectionPdf");

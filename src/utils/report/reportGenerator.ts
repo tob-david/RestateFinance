@@ -2,9 +2,9 @@ import { renderTemplate } from "./templateEngine";
 import { generateExcel } from "./excelGenerator";
 import { generatePdf, generatePdfFromHtml } from "./pdfGenerator";
 import {
-  GenerateReportParams,
-  ReportResult,
-  ExcelColumn,
+  IGenerateReportParams,
+  IReportResult,
+  IExcelColumn,
 } from "../types/report";
 import { CONTENT_TYPES } from "./constants";
 
@@ -12,8 +12,8 @@ import { CONTENT_TYPES } from "./constants";
  * Generate report in specified format (PDF, Excel, or HTML)
  */
 export async function generateReport(
-  params: GenerateReportParams
-): Promise<ReportResult> {
+  params: IGenerateReportParams
+): Promise<IReportResult> {
   const {
     template,
     data,
@@ -50,7 +50,7 @@ export async function generateReport(
         ]);
       } else {
         // Auto-generate columns
-        const columns: ExcelColumn[] = Object.keys(excelData[0] || {}).map(
+        const columns: IExcelColumn[] = Object.keys(excelData[0] || {}).map(
           (key) => ({
             header:
               key.charAt(0).toUpperCase() +

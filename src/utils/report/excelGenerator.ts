@@ -1,10 +1,10 @@
 import * as XLSX from "xlsx";
-import { ExcelColumn, ExcelSheetData } from "../types/report";
+import { IExcelColumn, IExcelSheetData } from "../types/report";
 
 /**
  * Generate Excel workbook from sheet data
  */
-export function generateExcel(sheets: ExcelSheetData[]): Buffer {
+export function generateExcel(sheets: IExcelSheetData[]): Buffer {
   const workbook = XLSX.utils.book_new();
 
   for (const sheet of sheets) {
@@ -44,7 +44,7 @@ export function generateSimpleExcel(
   }
 
   // Auto-generate columns from first row keys
-  const columns: ExcelColumn[] = Object.keys(data[0]).map((key) => ({
+  const columns: IExcelColumn[] = Object.keys(data[0]).map((key) => ({
     header:
       key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1"),
     key: key,
