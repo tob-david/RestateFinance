@@ -1,19 +1,19 @@
 import { findReminderByCustomerAndPeriod } from "../database/queries";
 import {
-  ProcessReminderResult,
-  SoaReminderRecord,
-  SoaProcessingType,
-  SoaProcessingItem,
-  CustomerModel,
-  BranchModel,
+  IProcessReminderResult,
+  ISoaReminderRecord,
+  ISoaProcessingItem,
+  ICustomerModel,
+  IBranchModel,
 } from "../utils/types/soa";
+import { SoaProcessingType } from "../utils/types";
 import { generateReminderLetter } from "./generateReminderLetter";
 
 export const processReminderLetter = async (
-  customer: CustomerModel,
-  branches: BranchModel[],
-  item: SoaProcessingItem
-): Promise<ProcessReminderResult> => {
+  customer: ICustomerModel,
+  branches: IBranchModel[],
+  item: ISoaProcessingItem
+): Promise<IProcessReminderResult> => {
   console.log(
     `Starting reminder letter processing for ${customer.code}, Type: ${
       SoaProcessingType[item.processingType]
@@ -24,7 +24,7 @@ export const processReminderLetter = async (
   const reminders = (await findReminderByCustomerAndPeriod(
     customer.code,
     item.timePeriod
-  )) as SoaReminderRecord[];
+  )) as ISoaReminderRecord[];
 
   if (!reminders || reminders.length === 0) {
     console.log(`Skipping ${customer.code}: No previous reminder records`);

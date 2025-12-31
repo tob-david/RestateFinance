@@ -1,6 +1,6 @@
 import { findAllBranches } from "../database/queries";
-import { BranchModel } from "../utils/types/soa";
+import { IBranchModel } from "../utils/types/soa";
 
-export const getAllBranches = async (): Promise<BranchModel[]> => {
+export const getAllBranches = async (): Promise<IBranchModel[]> => {
   return await findAllBranches();
 };

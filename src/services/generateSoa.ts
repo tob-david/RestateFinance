@@ -6,10 +6,10 @@ import {
 } from "../database/queries";
 
 import {
-  StatementOfAccountModel,
+  IStatementOfAccountModel,
   SoaProcessingPhase,
   defaultUserCode,
-  CustomerModel,
+  ICustomerModel,
 } from "../utils/types/soa";
 
 import { generateCollectionPdf, generateSoaExcel } from "../utils/report";
@@ -18,7 +18,7 @@ import { uploadFile } from "../utils/storage";
 
 export const generateSoa = async (
   branchCode: string,
-  customer: CustomerModel,
+  customer: ICustomerModel,
   classOfBusiness: string,
   dateNow: Date,
   toDate: number,
@@ -26,7 +26,7 @@ export const generateSoa = async (
   testMode: boolean,
   skipAgingFilter: boolean = false,
   skipDcNoteCheck: boolean = false
-): Promise<StatementOfAccountModel[] | null> => {
+): Promise<IStatementOfAccountModel[] | null> => {
   console.log(
     `GenerateSOA started for ${customer.code}, Branch: ${branchCode}, COB: ${classOfBusiness}`
   );

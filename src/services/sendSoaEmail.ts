@@ -1,18 +1,19 @@
 import { completePhase, insertPhase } from "../database/queries";
 
-import { EmailMessage, sendEmail } from "../utils/email";
+import { sendEmail } from "../utils/email";
+import { IEmailMessage } from "../utils/types";
 import { generateSoaEmailHtml } from "../utils/report";
 import {
   SoaProcessingPhase,
-  CustomerModel,
-  FileData,
+  ICustomerModel,
+  IFileData,
 } from "../utils/types/soa";
 
 export const sendSoaEmail = async (
-  customer: CustomerModel,
+  customer: ICustomerModel,
   toEmail: string,
-  excelFile: FileData,
-  pdfFile: FileData,
+  excelFile: IFileData,
+  pdfFile: IFileData,
   testMode: boolean,
   jobId: string
 ): Promise<boolean> => {
@@ -31,7 +32,7 @@ export const sendSoaEmail = async (
   await completePhase(jobId, SoaProcessingPhase.SendingEmail);
 
   // Prepare email message
-  const message: EmailMessage = {
+  const message: IEmailMessage = {
     to: [recipientEmail],
     subject: `SOA OUTSTANDING ${
       customer.fullName

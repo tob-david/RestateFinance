@@ -4,10 +4,10 @@ import {
   getReminderEmailSubject,
   ReminderEmailData,
 } from "../utils/report";
-import { CustomerModel } from "../utils/types/soa";
+import { ICustomerModel } from "../utils/types/soa";
 
 export const sendReminderEmail = async (params: {
-  customer: CustomerModel;
+  customer: ICustomerModel;
   toEmail: string;
   reminderType: string;
   letterNo: string;
