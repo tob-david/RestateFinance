@@ -1,21 +1,53 @@
-import { EmailAttachment, EmailMessage } from "./email";
+import { IEmailAttachment, IEmailMessage } from "./email";
+import { SoaProcessingType } from "./soa";
+
 import {
-  GenerateReportParams,
-  ExcelSheetData,
-  ReportOptions,
-  SoaFileResult,
-  ReportFormat,
-  ReportResult,
-  ExcelColumn,
+  IGenerateReminderResult,
+  IProcessReminderResult,
+  ISoaProcessingItem,
+  ICustomerModel,
+  IBranchModel,
+  ISoaReminderModel,
+  ISoaReminderLetterModel,
+  IStatementOfAccountModel,
+  IEmailTemplateModel,
+  ISoaReminderRecord,
+  IFileData,
+} from "./soa";
+
+import { IAccountRow, IGetSoaJob, IGetSoaBatchStatus } from "./customer";
+import {
+  IGenerateReportParams,
+  IExcelSheetData,
+  IReportOptions,
+  ISoaFileResult,
+  IReportResult,
+  IExcelColumn,
 } from "./report";
 
-export type { EmailAttachment, EmailMessage };
 export type {
-  GenerateReportParams,
-  ExcelSheetData,
-  ReportOptions,
-  SoaFileResult,
-  ReportFormat,
-  ReportResult,
-  ExcelColumn,
+  IGenerateReportParams,
+  IExcelSheetData,
+  IReportOptions,
+  ISoaFileResult,
+  IReportResult,
+  IExcelColumn,
+  IEmailAttachment,
+  IEmailMessage,
+  IGetSoaBatchStatus,
+  IAccountRow,
+  IGetSoaJob,
+  IGenerateReminderResult,
+  IProcessReminderResult,
+  ISoaProcessingItem,
+  ICustomerModel,
+  IBranchModel,
+  ISoaReminderModel,
+  ISoaReminderLetterModel,
+  IStatementOfAccountModel,
+  IEmailTemplateModel,
+  ISoaReminderRecord,
+  IFileData,
 };
+
+export { SoaProcessingType };

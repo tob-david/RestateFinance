@@ -1,3 +1,5 @@
+import { IAccountRow } from "./customer";
+
 export const multiBranchCodes = ["DIC", "DIP", "DIG", "DID"];
 export const defaultUserCode = "adm";
 
@@ -17,12 +19,12 @@ export enum SoaProcessingType {
   RL3 = 4,
 }
 
-export interface SoaProcessingItem {
+export interface ISoaProcessingItem {
   customerId: string;
   timePeriod: string;
   processingDate: string;
   batchId: string;
-  jobId: string;
+  jobId?: string;
   classOfBusiness: string;
   branch: string;
   toDate: number;
@@ -33,26 +35,26 @@ export interface SoaProcessingItem {
   skipDcNoteCheck?: boolean;
 }
 
-export interface CustomerModel {
+export interface ICustomerModel {
   code: string;
   fullName: string;
   actingCode: string;
   email?: string;
 }
 
-export interface BranchModel {
+export interface IBranchModel {
   code: string;
   name: string;
 }
 
-export interface SoaReminderModel {
+export interface ISoaReminderModel {
   id?: string;
   cmCode?: string;
   timePeriod?: string;
   officeId?: string;
 }
 
-export interface SoaReminderLetterModel {
+export interface ISoaReminderLetterModel {
   id?: string;
   reminderId: string;
   type: string;
@@ -61,7 +63,7 @@ export interface SoaReminderLetterModel {
   sentDate: Date;
 }
 
-export interface StatementOfAccountModel {
+export interface IStatementOfAccountModel {
   dcNoteNo: string;
   debitAndCreditNoteNo: string;
   aging: string;
@@ -73,7 +75,7 @@ export interface StatementOfAccountModel {
   branch?: string;
 }
 
-export interface FileData {
+export interface IFileData {
   fileName: string;
   bytes: Buffer;
   contentType: string;
@@ -81,7 +83,7 @@ export interface FileData {
   contentId?: string;
 }
 
-export interface EmailTemplateModel {
+export interface IEmailTemplateModel {
   name: string;
   asAtDate: Date;
   virtualNumber?: string;
@@ -94,20 +96,20 @@ export interface EmailTemplateModel {
   branch?: string;
 }
 
-export interface SoaReminderRecord {
+export interface ISoaReminderRecord {
   ID: string;
   CM_CODE: string;
   TIME_PERIOD: string;
   OFFICE_ID: string;
 }
 
-export interface ProcessReminderResult {
+export interface IProcessReminderResult {
   processed: boolean;
   remindersSent: number;
   dcNotesPaid: string[];
 }
 
-export interface GenerateReminderResult {
+export interface IGenerateReminderResult {
   sent: boolean;
   dcNotesPaid: string[];
   letterNo?: string;

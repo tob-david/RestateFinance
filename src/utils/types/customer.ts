@@ -1,21 +1,26 @@
 export interface IGetSoaJob {
-  JOB_ID: string;
-  BATCH_ID: number;
-  CUSTOMER_ID: string;
-  STATUS: string;
-  RETRY_ATTEMPT: number;
-  ERROR_MESSAGE: string;
-  STARTED_AT: Date;
-  COMPLETED_AT: Date;
+  job_id: string;
+  batch_id: number;
+  customer_id: string;
+  status: string;
+  retry_attempt: number;
+  error_message: string;
+  started_at: Date;
+  completed_at: Date;
 }
 
 export interface IGetSoaBatchStatus {
-  BATCH_ID: string;
-  STATUS: string;
-  TOTAL_CUSTOMERS: number;
-  PROCESSED_CUSTOMERS: number;
-  FAILED_CUSTOMERS: number;
-  CREATED_AT: Date;
-  COMPLETED_AT: Date;
-  ERROR_DETAILS: string;
+  batch_id: string;
+  status: string;
+  total_customers: number;
+  processed_customers: number;
+  failed_customers: number;
+  created_at: Date;
+  completed_at: Date;
+  error_details: string;
+}
+
+export interface IAccountRow {
+  cm_code: string;
+  cm_name: string;
 }

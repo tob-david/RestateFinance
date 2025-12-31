@@ -1,12 +1,12 @@
-export interface EmailAttachment {
+export interface IEmailAttachment {
   name: string;
   contentType: string;
   contentBytes: string;
 }
-export interface EmailMessage {
+export interface IEmailMessage {
   to: string[];
   cc?: string[];
   subject: string;
   body: string;
-  attachments?: EmailAttachment[];
+  attachments?: IEmailAttachment[];
 }

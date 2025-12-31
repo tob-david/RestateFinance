@@ -1,7 +1,8 @@
-export type ReportFormat = "pdf" | "xlsx" | "html";
+type ReportFormat = "pdf" | "xlsx" | "html";
+type FileFormat = "A4" | "Letter" | "Legal";
 
-export interface ReportOptions {
-  format?: "A4" | "Letter" | "Legal";
+export interface IReportOptions {
+  format?: FileFormat;
   landscape?: boolean;
   margin?: { top?: string; right?: string; bottom?: string; left?: string };
   headerTemplate?: string;
@@ -9,35 +10,35 @@ export interface ReportOptions {
   displayHeaderFooter?: boolean;
 }
 
-export interface ExcelColumn {
+export interface IExcelColumn {
   header: string;
   key: string;
   width?: number;
 }
 
-export interface ExcelSheetData {
+export interface IExcelSheetData {
   sheetName: string;
-  columns: ExcelColumn[];
+  columns: IExcelColumn[];
   rows: Record<string, any>[];
 }
 
-export interface GenerateReportParams {
+export interface IGenerateReportParams {
   template: string;
   data: Record<string, any>;
   format: ReportFormat;
   filename: string;
-  options?: ReportOptions;
-  excelColumns?: ExcelColumn[];
+  options?: IReportOptions;
+  excelColumns?: IExcelColumn[];
   excelDataKey?: string;
 }
 
-export interface ReportResult {
+export interface IReportResult {
   buffer: Buffer;
   filename: string;
   contentType: string;
 }
 
-export interface SoaFileResult {
+export interface ISoaFileResult {
   fileName: string;
   contentType: string;
   bytes: Buffer;
