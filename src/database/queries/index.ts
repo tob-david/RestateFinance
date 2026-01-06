@@ -15,6 +15,8 @@ export {
   updateBatchStatus,
   incrementProcessedCount,
   incrementFailedCount,
+  incrementProcessedAndCheckComplete,
+  incrementFailedAndCheckComplete,
 } from "./batchQuery";
 
 // Job Queries
