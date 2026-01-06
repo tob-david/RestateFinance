@@ -1,5 +1,5 @@
 import { callProcedure } from "../config";
-import { StatementOfAccountModel } from "../../utils/types/soa";
+import { IStatementOfAccountModel } from "../../utils/types/soa";
 
 /**
  * Fetch SOA data from stored procedure
@@ -11,7 +11,7 @@ export const fetchSoaFromProcedure = async (
   accountName: string | null,
   toDate: Date,
   userCode: string
-): Promise<StatementOfAccountModel[]> => {
+): Promise<IStatementOfAccountModel[]> => {
   const rows = await callProcedure("PACKAGE_RPT_FI_SOA.get_rpt_fi_soa_new", {
     p_office: officeCode,
     p_class: classOfBusiness,

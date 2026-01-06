@@ -73,3 +73,95 @@ export const incrementFailedCount = async (batchId: string) => {
 
   await executeQuery(sql, { batchId }, { autoCommit: true });
 };
+
+/**
+ * Increment processed count and check if batch is complete (Event-Driven Counter)
+ * Returns true if this was the last customer to complete
+ */
+export const incrementProcessedAndCheckComplete = async (
+  batchId: string
+): Promise<{ isComplete: boolean; status: string }> => {
+  // Increment processed count
+  await executeQuery(
+    `UPDATE SOA_PROCESSING_BATCHES
+     SET PROCESSED_CUSTOMERS = PROCESSED_CUSTOMERS + 1
+     WHERE BATCH_ID = hextoraw(:batchId)`,
+    { batchId },
+    { autoCommit: true }
+  );
+
+  // Get current status
+  const result = await executeQuery(
+    `SELECT TOTAL_CUSTOMERS, PROCESSED_CUSTOMERS, FAILED_CUSTOMERS
+     FROM SOA_PROCESSING_BATCHES
+     WHERE BATCH_ID = hextoraw(:batchId)`,
+    { batchId }
+  );
+
+  const row = result.rows?.[0] as any;
+  if (!row) return { isComplete: false, status: "Unknown" };
+
+  const total = row.TOTAL_CUSTOMERS ?? 0;
+  const processed = row.PROCESSED_CUSTOMERS ?? 0;
+  const failed = row.FAILED_CUSTOMERS ?? 0;
+  const totalDone = processed + failed;
+
+  if (totalDone >= total) {
+    // Determine final status
+    let status = "Completed";
+    if (failed > 0 && processed > 0) {
+      status = "Partially Failed";
+    } else if (processed === 0) {
+      status = "Failed";
+    }
+    return { isComplete: true, status };
+  }
+
+  return { isComplete: false, status: "Processing" };
+};
+
+/**
+ * Increment failed count and check if batch is complete (Event-Driven Counter)
+ * Returns true if this was the last customer to complete
+ */
+export const incrementFailedAndCheckComplete = async (
+  batchId: string
+): Promise<{ isComplete: boolean; status: string }> => {
+  // Increment failed count
+  await executeQuery(
+    `UPDATE SOA_PROCESSING_BATCHES
+     SET FAILED_CUSTOMERS = FAILED_CUSTOMERS + 1
+     WHERE BATCH_ID = hextoraw(:batchId)`,
+    { batchId },
+    { autoCommit: true }
+  );
+
+  // Get current status
+  const result = await executeQuery(
+    `SELECT TOTAL_CUSTOMERS, PROCESSED_CUSTOMERS, FAILED_CUSTOMERS
+     FROM SOA_PROCESSING_BATCHES
+     WHERE BATCH_ID = hextoraw(:batchId)`,
+    { batchId }
+  );
+
+  const row = result.rows?.[0] as any;
+  if (!row) return { isComplete: false, status: "Unknown" };
+
+  const total = row.TOTAL_CUSTOMERS ?? 0;
+  const processed = row.PROCESSED_CUSTOMERS ?? 0;
+  const failed = row.FAILED_CUSTOMERS ?? 0;
+  const totalDone = processed + failed;
+
+  if (totalDone >= total) {
+    // Determine final status
+    let status = "Completed";
+    if (failed > 0 && processed > 0) {
+      status = "Partially Failed";
+    } else if (processed === 0) {
+      status = "Failed";
+    }
+    return { isComplete: true, status };
+  }
+
+  return { isComplete: false, status: "Processing" };
+};
