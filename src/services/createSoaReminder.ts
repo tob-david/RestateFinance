@@ -1,11 +1,11 @@
-import { CustomerModel, StatementOfAccountModel } from "../utils/types/soa";
+import { ICustomerModel, IStatementOfAccountModel } from "../utils/types/soa";
 import { insertReminderDetail, insertReminder } from "../database/queries";
 
 export const createSoaReminder = async (
-  customer: CustomerModel,
+  customer: ICustomerModel,
   timePeriod: string,
   branchCode: string,
-  soaList: StatementOfAccountModel[]
+  soaList: IStatementOfAccountModel[]
 ): Promise<string> => {
   console.log(
     `Creating SOA reminder for ${customer.code}, branch: ${branchCode}`

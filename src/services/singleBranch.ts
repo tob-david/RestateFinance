@@ -1,19 +1,19 @@
 import { generateSoa } from "./generateSoa";
 
 import {
-  StatementOfAccountModel,
-  SoaProcessingItem,
-  CustomerModel,
+  IStatementOfAccountModel,
+  ISoaProcessingItem,
+  ICustomerModel,
 } from "../utils/types/soa";
 
 export const singleBranch = async (
   branchCode: string,
-  customer: CustomerModel,
-  item: SoaProcessingItem
+  customer: ICustomerModel,
+  item: ISoaProcessingItem
 ): Promise<{
   processed: boolean;
   recordCount: number;
-  soaData?: StatementOfAccountModel[];
+  soaData?: IStatementOfAccountModel[];
 }> => {
   const dateNow = new Date(item.processingDate);
 
@@ -25,7 +25,7 @@ export const singleBranch = async (
     item.classOfBusiness,
     dateNow,
     item.toDate,
-    item.jobId,
+    item.jobId || "",
     item.testMode,
     item.skipAgingFilter ?? false,
     item.skipDcNoteCheck ?? false
