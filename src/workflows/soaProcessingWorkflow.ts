@@ -1,37 +1,33 @@
-/**
- * Child Workflow: SoaProcessingWorkflow
- * Memproses SOA untuk satu customer
- * Dipanggil oleh SoaWorkflow (parent) untuk setiap customer
- */
-import * as restate from "@restatedev/restate-sdk";
 import { WorkflowContext } from "@restatedev/restate-sdk";
+import * as restate from "@restatedev/restate-sdk";
 import { createHash } from "crypto";
 
 import {
-  findAllBranches,
-  findJobByBatchAndCustomer,
   findReminderByCustomerAndPeriod,
+  findJobByBatchAndCustomer,
   incrementFailedCount,
-  incrementProcessedCount,
-  insertJob,
+  findAllBranches,
   updateJobStatus,
+  insertJob,
+  updateBatchStatus,
+  incrementProcessedAndCheckComplete,
 } from "../database/queries";
 
+import { processReminderLetter } from "../services/processReminderLetter";
+import { shouldProcessReminder } from "../services/shouldProcessReminder";
+import { isMultiBranchCustomer } from "../services/multiBranchCustomer";
+import { downloadSoaFiles } from "../utils/storage/fileOperations";
 import { createSoaReminder } from "../services/createSoaReminder";
 import { getAllBranches } from "../services/getAllBranches";
 import { getCustomerInfo } from "../services/getCustomer";
-import { isMultiBranchCustomer } from "../services/multiBranchCustomer";
-import { processReminderLetter } from "../services/processReminderLetter";
 import { sendSoaEmail } from "../services/sendSoaEmail";
-import { shouldProcessReminder } from "../services/shouldProcessReminder";
 import { singleBranch } from "../services/singleBranch";
-import { downloadSoaFiles } from "../utils/storage/fileOperations";
 
 import {
-  IGetSoaJob,
-  ISoaProcessingItem,
   IStatementOfAccountModel,
+  ISoaProcessingItem,
   SoaProcessingType,
+  IGetSoaJob,
 } from "../utils/types";
 
 export const soaProcessingWorkflow = restate.workflow({
@@ -54,12 +50,12 @@ export const soaProcessingWorkflow = restate.workflow({
       } = params;
 
       ctx.console.log(
-        `🚀 Starting SoaProcessingWorkflow for customer: ${customerId}`
+        `Starting SoaProcessingWorkflow for customer: ${customerId}`
       );
 
       // Step 1: Get or Create Job
       const { jobId, retryAttempt } = await ctx.run(
-        "getOrCreateJob",
+        "get-or-create-job",
         async () => {
           const existingJob = (await findJobByBatchAndCustomer(
             batchId,
@@ -106,12 +102,12 @@ export const soaProcessingWorkflow = restate.workflow({
       while (currentRetryAttempt <= maxRetries && !success) {
         try {
           // Update status to Processing
-          await ctx.run("UpdateProcessing", async () => {
+          await ctx.run("update-processing", async () => {
             await updateJobStatus(jobId, "Processing");
           });
 
           // Get customer info
-          const customerData = await ctx.run("GetCustomer", async () => {
+          const customerData = await ctx.run("get-customer", async () => {
             return await getCustomerInfo(jobId, customerId);
           });
 
@@ -121,7 +117,7 @@ export const soaProcessingWorkflow = restate.workflow({
 
           // Check SOA history to decide: new SOA or Reminder Letter
           const existingReminders = await ctx.run(
-            "CheckSoaHistory",
+            "check-soa-history",
             async () => {
               return await findReminderByCustomerAndPeriod(
                 customerData.code,
@@ -145,11 +141,11 @@ export const soaProcessingWorkflow = restate.workflow({
           if (shouldDoReminder) {
             // ========== PROCESS REMINDER LETTER ==========
             const branchesForReminder = await ctx.run(
-              "GetBranchesForReminder",
+              "get-branches-for-reminder",
               async () => await findAllBranches()
             );
 
-            await ctx.run("ProcessReminder", async () => {
+            await ctx.run("process-reminder", async () => {
               return await processReminderLetter(
                 customerData,
                 branchesForReminder,
@@ -161,7 +157,7 @@ export const soaProcessingWorkflow = restate.workflow({
             if (isMultiBranchCustomer(customerData.actingCode)) {
               // Multi-branch processing
               const branches = await ctx.run(
-                "GetBranches",
+                "get-branches",
                 async () => await getAllBranches()
               );
 
@@ -181,7 +177,7 @@ export const soaProcessingWorkflow = restate.workflow({
 
                 if (branchResult.soaData && branchResult.soaData.length > 0) {
                   await ctx.run(
-                    `CreateReminder-${branchItem.code}`,
+                    `create-reminder-${branchItem.code}`,
                     async () => {
                       return await createSoaReminder(
                         customerData,
@@ -195,7 +191,7 @@ export const soaProcessingWorkflow = restate.workflow({
               }
             } else {
               // Single branch processing
-              const singleResult = await ctx.run("SingleBranch", async () => {
+              const singleResult = await ctx.run("single-branch", async () => {
                 return await singleBranch(
                   processingItem.branch,
                   customerData,
@@ -204,7 +200,7 @@ export const soaProcessingWorkflow = restate.workflow({
               });
 
               if (singleResult.soaData && singleResult.soaData.length > 0) {
-                await ctx.run("CreateReminder", async () => {
+                await ctx.run("create-reminder", async () => {
                   return await createSoaReminder(
                     customerData,
                     processingItem.timePeriod,
@@ -216,7 +212,7 @@ export const soaProcessingWorkflow = restate.workflow({
             }
 
             // Send Email - ONLY for NEW SOA
-            await ctx.run("SendEmail", async () => {
+            await ctx.run("send-email", async () => {
               const dateStr = new Date().toISOString().split("T")[0];
               const excelFileName = `SOA_${customerId}_${dateStr}.xlsx`;
               const pdfFileName = `Collection_${customerId}_${dateStr}.pdf`;
@@ -280,7 +276,7 @@ export const soaProcessingWorkflow = restate.workflow({
 
               // Check if still has outstanding
               const outstandingReminders = await ctx.run(
-                `CheckPayment-RL${currentReminderCount + 1}`,
+                `check-payment-rl${currentReminderCount + 1}`,
                 async () => {
                   return await findReminderByCustomerAndPeriod(
                     customerData.code,
@@ -306,7 +302,7 @@ export const soaProcessingWorkflow = restate.workflow({
               ctx.console.log(`Processing RL${currentReminderCount}`);
 
               const branchesForReminder = await ctx.run(
-                `GetBranchesForReminder-RL${currentReminderCount}`,
+                `get-branches-for-reminder-rl${currentReminderCount}`,
                 async () => await findAllBranches()
               );
 
@@ -316,7 +312,7 @@ export const soaProcessingWorkflow = restate.workflow({
               };
 
               await ctx.run(
-                `SendReminder-RL${currentReminderCount}`,
+                `send-reminder-rl${currentReminderCount}`,
                 async () => {
                   return await processReminderLetter(
                     customerData,
@@ -335,9 +331,21 @@ export const soaProcessingWorkflow = restate.workflow({
           }
 
           // Mark as Completed
-          await ctx.run("MarkCompleted", async () => {
+          await ctx.run("customer-completed", async () => {
             await updateJobStatus(jobId, "Completed");
-            await incrementProcessedCount(batchId);
+            // await incrementProcessedCount(batchId);
+          });
+
+          await ctx.run("batch-completed", async () => {
+            const { isComplete, status } =
+              await incrementProcessedAndCheckComplete(batchId);
+            if (isComplete) {
+              await updateBatchStatus(batchId, status);
+
+              ctx.console.log(
+                `Batch ${batchId} completed with status ${status}`
+              );
+            }
           });
 
           success = true;
@@ -346,7 +354,7 @@ export const soaProcessingWorkflow = restate.workflow({
           currentRetryAttempt++;
 
           if (currentRetryAttempt <= maxRetries) {
-            await ctx.run(`MarkRetrying-${currentRetryAttempt}`, async () => {
+            await ctx.run(`mark-retrying-${currentRetryAttempt}`, async () => {
               await updateJobStatus(
                 jobId,
                 "Retrying",
@@ -358,7 +366,7 @@ export const soaProcessingWorkflow = restate.workflow({
             ctx.console.log(`Retrying (${currentRetryAttempt}/${maxRetries})`);
             await ctx.sleep(1000 * currentRetryAttempt);
           } else {
-            await ctx.run("MarkFailed", async () => {
+            await ctx.run("mark-failed", async () => {
               await updateJobStatus(
                 jobId,
                 "Failed",

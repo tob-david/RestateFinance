@@ -2,81 +2,77 @@ import { WorkflowContext } from "@restatedev/restate-sdk";
 import * as restate from "@restatedev/restate-sdk";
 import { v4 as uuidv4 } from "uuid";
 
-import { customerService, CustomerService } from "../handlers/customersHandler";
-import { batchService, BatchService } from "../handlers/batchHandler";
-
-import { documentTypes } from "../utils/schema/SoaAutomationSchema";
-import { IAccountRow, SoaProcessingType } from "../utils/types";
-import { formatUUID } from "../utils/formater";
 import {
   soaProcessingWorkflow,
   SoaProcessingWorkflow,
 } from "./soaProcessingWorkflow";
 
+import { documentTypes } from "../utils/schema/SoaAutomationSchema";
+import { SoaProcessingType } from "../utils/types";
+import { formatUUID } from "../utils/formater";
+import { IAccountRow } from "../utils/types";
+
+import {
+  updateBatchStatus,
+  findAllAccounts,
+  insertBatch,
+} from "../database/queries";
+
 export const soaWorkflow = restate.workflow({
-  name: "SoaWorkflowV1",
+  name: "SoaWorkflow",
   handlers: {
     run: async (ctx: WorkflowContext, type: documentTypes) => {
-      // Initialize values
-      const { batchId, timePeriod, toDate, processingDate } = await ctx.run(
-        "initializeWorkflow",
-        () => {
-          const dateNow = new Date();
-          return {
-            batchId: formatUUID(uuidv4()),
-            timePeriod: dateNow.toISOString().slice(0, 7),
-            toDate: Math.floor(dateNow.getTime() / 1000),
-            processingDate: dateNow.toISOString(),
-          };
-        }
-      );
+      ctx.console.log("Starting SOA workflow");
 
+      const dateNow = new Date();
+      const timePeriod = dateNow.toISOString().slice(0, 7);
       const classOfBusiness = "ALL";
       const branch = "ALL";
+      const toDate = Math.floor(dateNow.getTime() / 1000);
       const maxRetries = 3;
-
-      ctx.console.log(`🚀 Starting SoaWorkflow, batchId: ${batchId}`);
+      const processingDate = dateNow.toISOString();
 
       // ========== STEP 1: Get Customers ==========
-      const customers = await ctx
-        .serviceClient<CustomerService>(customerService)
-        .getCustomers();
-
-      if (!customers?.rows || customers.rows.length === 0) {
-        throw new restate.TerminalError("No customers found");
-      }
-
-      const customerRows = (customers.rows ?? []) as IAccountRow[];
-      ctx.console.log(`Found ${customerRows.length} customers to process`);
-
-      // ========== STEP 2: Create Batch ==========
-      await ctx.serviceClient<BatchService>(batchService).createBatch({
-        batchId,
-        totalAccounts: customerRows.length,
+      const customers = await ctx.run("get-customers", async () => {
+        return await findAllAccounts();
       });
 
-      ctx.console.log(`Batch created: ${batchId}`);
+      if (!customers?.rows || customers.rows.length === 0) {
+        throw new Error("No customers found");
+      }
 
-      // ========== STEP 3: Create child workflow for each customer ==========
+      let customerRows = (customers.rows ?? []) as IAccountRow[];
+
+      // ========== STEP 2: Create Batch ==========
+      const batchId = await ctx.run("create-batch", async () => {
+        const id = formatUUID(uuidv4());
+        await insertBatch(id, customerRows.length, "Queued");
+        return id;
+      });
+
+      ctx.console.log(
+        `Batch created: ${batchId}, Total: ${customerRows.length}`
+      );
+
+      // ========== STEP 3: Spawn Child Workflows ==========
+      await ctx.run("soa-processing-start", async () => {
+        await updateBatchStatus(batchId, "Processing");
+      });
+
       const processingType =
         SoaProcessingType[type.type as keyof typeof SoaProcessingType];
 
-      const childWorkflowResults: Array<{
-        customerId: string;
-        workflowKey: string;
-        status: string;
-      }> = [];
+      const totalCustomers = customerRows.length;
 
       for (const customer of customerRows) {
         const customerId = customer.cm_code;
-        const workflowKey = customerId;
 
-        ctx.console.log(`Spawning child workflow for: ${customerId}`);
         ctx
           .workflowSendClient<SoaProcessingWorkflow>(
             soaProcessingWorkflow,
-            workflowKey
+            customerId
           )
+          // panggil data disini > table
           .run({
             customerId,
             timePeriod,
@@ -91,26 +87,15 @@ export const soaWorkflow = restate.workflow({
             skipAgingFilter: type.skipAgingFilter ?? false,
             skipDcNoteCheck: type.skipDcNoteCheck ?? false,
           });
-
-        childWorkflowResults.push({
-          customerId,
-          workflowKey,
-          status: "spawned",
-        });
-
-        ctx.console.log(`Child workflow spawned for: ${customerId}`);
       }
 
-      // ========== STEP 4: Finalize Batch ==========
-      const finalStatus = await ctx
-        .serviceClient<BatchService>(batchService)
-        .finalizeBatch({ batchId, customers: customerRows });
+      ctx.console.log("Finished SOA workflow");
 
       return {
-        status: finalStatus.status,
-        message: "SOA processing completed",
         batchId,
-        totalCustomers: customerRows.length,
+        message: "SOA processing started successfully",
+        totalCustomers,
+        Status: "Queued",
       };
     },
   },
