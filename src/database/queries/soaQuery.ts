@@ -1,8 +1,10 @@
 import { callProcedure } from "../config";
 import { IStatementOfAccountModel } from "../../utils/types/soa";
+import { transformSoaRow } from "../../streaming/transformers/soaTransformer";
 
 /**
  * Fetch SOA data from stored procedure
+ * Uses PACKAGE_RPT_FI_SOA.get_rpt_fi_soa_new which returns cursor with all SOA columns
  */
 export const fetchSoaFromProcedure = async (
   officeCode: string,
@@ -21,19 +23,8 @@ export const fetchSoaFromProcedure = async (
     p_userid: userCode,
   });
 
-  // Stored procedure returns array with indexes, not object with named properties
-  // Based on log output, mapping is:
-  // [0]=Branch, [1]=DCNoteNo, [7]=ClassOfBusiness, [10]=InsuredName, [11]=CustomerName
-  // [17]=Aging(days), [23]=NetPremium, [34]=DCNoteId, [35]=NetPremiumIDR
-  return rows.map((row: any) => ({
-    branch: row[0],
-    dcNoteNo: row[1],
-    debitAndCreditNoteNo: row[34] || row[1], // DC Note ID or DC Note No
-    classOfBusiness: row[7],
-    insuredName: row[10],
-    aging: row[17]?.toString() || "0",
-    netPremium: row[23] || 0,
-    netPremiumIdr: row[35] || row[23] || 0,
-    policyNo: row[3] || row[5],
-  }));
+  // Use the transformer to map Oracle cursor columns to IStatementOfAccountModel
+  return rows
+    .map((row: any[]) => transformSoaRow(row))
+    .filter((row): row is IStatementOfAccountModel => row !== null);
 };
