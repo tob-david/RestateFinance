@@ -1,5 +1,7 @@
 import { IEmailAttachment, IEmailMessage } from "./email";
 import { SoaProcessingType } from "./soa";
+import { IOracleStreamOptions } from "./streaming";
+import { ISoaParquetFilter } from "./parquet";
 
 import {
   IGenerateReminderResult,
@@ -48,6 +50,8 @@ export type {
   IEmailTemplateModel,
   ISoaReminderRecord,
   IFileData,
+  IOracleStreamOptions,
+  ISoaParquetFilter,
 };
 
 export { SoaProcessingType };
