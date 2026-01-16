@@ -11,7 +11,7 @@ import { StorageFileData, UploadResult } from "../types/storage";
  */
 function generateBlobPath(
   customerCode: string,
-  type: "excel" | "pdf",
+  type: "excel" | "pdf" | "parquet",
   fileName: string
 ): string {
   const now = new Date();
@@ -27,7 +27,7 @@ function generateBlobPath(
 export async function uploadFile(
   fileData: StorageFileData,
   customerCode: string,
-  type: "excel" | "pdf"
+  type: "excel" | "pdf" | "parquet"
 ): Promise<UploadResult> {
   const container = getContainerClient();
   const blobName = generateBlobPath(customerCode, type, fileData.fileName);
