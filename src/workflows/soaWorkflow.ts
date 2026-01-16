@@ -8,8 +8,12 @@ import {
 } from "./soaProcessingWorkflow";
 
 import { documentTypes } from "../utils/schema/SoaAutomationSchema";
-import { SoaProcessingType } from "../utils/types";
-import { formatUUID } from "../utils/formater";
+import {
+  formatDateToUnixTimestamp,
+  parseProcessingType,
+  formatTimePeriod,
+  formatUUID,
+} from "../utils/formater";
 import { IAccountRow } from "../utils/types";
 
 import {
@@ -25,14 +29,15 @@ export const soaWorkflow = restate.workflow({
       ctx.console.log("Starting SOA workflow");
 
       const dateNow = new Date();
-      const timePeriod = dateNow.toISOString().slice(0, 7);
+      const timePeriod = formatTimePeriod(dateNow);
       const classOfBusiness = "ALL";
       const branch = "ALL";
-      const toDate = Math.floor(dateNow.getTime() / 1000);
+      const toDate = formatDateToUnixTimestamp(dateNow);
       const maxRetries = 3;
       const processingDate = dateNow.toISOString();
+      const processingType = parseProcessingType(type.type);
 
-      // ========== STEP 1: Get Customers ==========
+      // Get Customers
       const customers = await ctx.run("get-customers", async () => {
         return await findAllAccounts();
       });
@@ -42,27 +47,21 @@ export const soaWorkflow = restate.workflow({
       }
 
       let customerRows = (customers.rows ?? []) as IAccountRow[];
+      const totalCustomers = customerRows.length;
 
-      // ========== STEP 2: Create Batch ==========
+      // Create Batch
       const batchId = await ctx.run("create-batch", async () => {
         const id = formatUUID(uuidv4());
-        await insertBatch(id, customerRows.length, "Queued");
+        await insertBatch(id, totalCustomers, "Queued");
         return id;
       });
 
-      ctx.console.log(
-        `Batch created: ${batchId}, Total: ${customerRows.length}`
-      );
+      ctx.console.log(`Batch created: ${batchId}, Total: ${totalCustomers}`);
 
-      // ========== STEP 3: Spawn Child Workflows ==========
+      // Spawn Child Workflows
       await ctx.run("soa-processing-start", async () => {
         await updateBatchStatus(batchId, "Processing");
       });
-
-      const processingType =
-        SoaProcessingType[type.type as keyof typeof SoaProcessingType];
-
-      const totalCustomers = customerRows.length;
 
       for (const customer of customerRows) {
         const customerId = customer.cm_code;
