@@ -2,9 +2,6 @@ import { v4 as uuidv4 } from "uuid";
 import { executeQuery } from "../config";
 import { formatUUID } from "../../utils/formater";
 
-/**
- * Insert a reminder letter record
- */
 export const insertReminderLetter = async (
   reminderId: string,
   type: string,
@@ -37,14 +34,11 @@ export const insertReminderLetter = async (
   return id;
 };
 
-/**
- * Find the latest reminder letter for a reminder
- */
 export const findLatestLetter = async (
   reminderId: string
-): Promise<{ TYPE: string; SENT_DATE: Date; LETTER_NO: string } | null> => {
+): Promise<{ type: string; sentDate: Date; letterNo: string } | null> => {
   const sql = `
-    SELECT TYPE, SENT_DATE, LETTER_NO FROM (
+    SELECT TYPE as type, SENT_DATE as sentDate, LETTER_NO as letterNo FROM (
       SELECT TYPE, SENT_DATE, LETTER_NO
       FROM SOA_REMINDER_LETTER
       WHERE REMINDER_ID = hextoraw(:reminderId)
@@ -56,9 +50,6 @@ export const findLatestLetter = async (
   return (result.rows?.[0] as any) ?? null;
 };
 
-/**
- * Get next letter sequence number
- */
 export const getNextLetterSequence = async (
   type: string,
   year: number,

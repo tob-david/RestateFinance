@@ -7,16 +7,10 @@ export const CONTENT_TYPES = {
   OCTET_STREAM: "application/octet-stream",
 } as const;
 
-/**
- * Convert buffer to Base64 string (for email attachments)
- */
 export function bufferToBase64(buffer: Buffer): string {
   return buffer.toString("base64");
 }
 
-/**
- * Get content type by file extension
- */
 export function getContentType(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase();
   switch (ext) {
