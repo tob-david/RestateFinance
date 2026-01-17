@@ -7,5 +7,6 @@ export const shouldProcessReminder = (
   if (!hasExistingReminders && processingType === SoaProcessingType.SOA) {
     return false;
   }
+
   return true;
 };

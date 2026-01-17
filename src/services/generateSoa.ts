@@ -124,10 +124,10 @@ export const generateSoa = async (
 
   // Generate Excel file
   const excelFile = await generateSoaExcel(
+    soaList,
     customer.code,
-    toDate,
-    branchCode,
-    classOfBusiness
+    dateStr,
+    branchCode
   );
   console.log(`Generated Excel: ${excelFile.fileName}`);
 

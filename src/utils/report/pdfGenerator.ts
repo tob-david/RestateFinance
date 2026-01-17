@@ -1,6 +1,7 @@
-import { getBrowser } from "./browserManager";
+// import { getBrowser } from "./browserManager";
 import { renderTemplate } from "./templateEngine";
 import { IReportOptions } from "../types/report";
+import puppeteer from "puppeteer";
 
 /**
  * Generate PDF from HTML string
@@ -9,7 +10,13 @@ export async function generatePdfFromHtml(
   html: string,
   options?: IReportOptions
 ): Promise<Buffer> {
-  const browser = await getBrowser();
+  // const browser = await getBrowser();
+  const browser = await puppeteer.launch({
+    executablePath:
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    headless: true,
+  });
+
   let page;
 
   try {
