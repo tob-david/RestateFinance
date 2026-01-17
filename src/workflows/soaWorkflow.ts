@@ -58,7 +58,7 @@ export const soaWorkflow = restate.workflow({
 
       ctx.console.log(`Batch created: ${batchId}, Total: ${totalCustomers}`);
 
-      // Spawn Child Workflows
+      // Processing SOA for each customer
       await ctx.run("soa-processing-start", async () => {
         await updateBatchStatus(batchId, "Processing");
       });
@@ -71,7 +71,6 @@ export const soaWorkflow = restate.workflow({
             soaProcessingWorkflow,
             customerId
           )
-          // panggil data disini > table
           .run({
             customerId,
             timePeriod,

@@ -3,14 +3,14 @@ import * as restate from "@restatedev/restate-sdk";
 import { createHash } from "crypto";
 
 import {
+  incrementProcessedAndCheckComplete,
   findReminderByCustomerAndPeriod,
   findJobByBatchAndCustomer,
   incrementFailedCount,
+  updateBatchStatus,
   findAllBranches,
   updateJobStatus,
   insertJob,
-  updateBatchStatus,
-  incrementProcessedAndCheckComplete,
 } from "../database/queries";
 
 import { processReminderLetter } from "../services/processReminderLetter";
@@ -49,9 +49,7 @@ export const soaProcessingWorkflow = restate.workflow({
         skipDcNoteCheck,
       } = params;
 
-      ctx.console.log(
-        `Starting SoaProcessingWorkflow for customer: ${customerId}`
-      );
+      ctx.console.log(`Starting SOA for customer: ${customerId}`);
 
       // Step 1: Get or Create Job
       const { jobId, retryAttempt } = await ctx.run(
@@ -68,7 +66,7 @@ export const soaProcessingWorkflow = restate.workflow({
             .toString()
             .toUpperCase();
 
-          const retry = existingJob?.retry_attempt ?? 0;
+          const retry = existingJob?.retry_attempt || 0;
 
           if (!existingJob) {
             await insertJob(newJobId, batchId, customerId);
@@ -106,7 +104,7 @@ export const soaProcessingWorkflow = restate.workflow({
             await updateJobStatus(jobId, "Processing");
           });
 
-          // Get customer info
+          // Get customer info: displays code, fullname, actingcode and email
           const customerData = await ctx.run("get-customer", async () => {
             return await getCustomerInfo(jobId, customerId);
           });
@@ -126,25 +124,33 @@ export const soaProcessingWorkflow = restate.workflow({
             }
           );
 
+          /*
+          If processingType == SOA:
+            - Not found data in SOA_REMINDER → create New SOA
+            - Found data in SOA_REMINDER → create Reminder Letter
+            If processingType !== SOA → always create Reminder Letter
+          */
           const hasExistingReminders = existingReminders.length > 0;
           const shouldDoReminder = shouldProcessReminder(
             hasExistingReminders,
             processingItem.processingType
           );
 
-          ctx.console.log(
-            `Decision for ${customerId}: ${
-              shouldDoReminder ? "REMINDER LETTER" : "NEW SOA"
-            }`
-          );
-
           if (shouldDoReminder) {
             // ========== PROCESS REMINDER LETTER ==========
+
+            // Displays branch code and name
             const branchesForReminder = await ctx.run(
               "get-branches-for-reminder",
               async () => await findAllBranches()
             );
 
+            /*
+            So the processReminderLetter function has parameters:
+            customerData (code, fullName, actingCode, email)
+            branchesForReminder (office_code, name)
+            processingItem (customerId, timePeriod, processingDate, batchId, jobId, classOfBusiness, branch, toDate, maxRetries, processingType, testMode, skipAgingFilter, skipDcNoteCheck)
+            */
             await ctx.run("process-reminder", async () => {
               return await processReminderLetter(
                 customerData,
@@ -165,10 +171,10 @@ export const soaProcessingWorkflow = restate.workflow({
 
               for (const branchItem of branches) {
                 const branchResult = await ctx.run(
-                  `Branch-${branchItem.code}`,
+                  `Branch-${branchItem.office_code}`,
                   async () => {
                     return await singleBranch(
-                      branchItem.code,
+                      branchItem.office_code,
                       customerData,
                       processingItem
                     );
@@ -177,12 +183,12 @@ export const soaProcessingWorkflow = restate.workflow({
 
                 if (branchResult.soaData && branchResult.soaData.length > 0) {
                   await ctx.run(
-                    `create-reminder-${branchItem.code}`,
+                    `create-reminder-${branchItem.office_code}`,
                     async () => {
                       return await createSoaReminder(
                         customerData,
                         processingItem.timePeriod,
-                        branchItem.code,
+                        branchItem.office_code,
                         branchResult.soaData as IStatementOfAccountModel[]
                       );
                     }
@@ -349,7 +355,7 @@ export const soaProcessingWorkflow = restate.workflow({
           });
 
           success = true;
-          ctx.console.log(`✅ Completed: ${customerId}`);
+          ctx.console.log(`Completed: ${customerId}`);
         } catch (error: any) {
           currentRetryAttempt++;
 
