@@ -6,11 +6,11 @@ import { formatUUID } from "../../utils/formater";
  * Find reminder by customer code and time period
  */
 export const findReminderByCustomerAndPeriod = async (
-  cmCode: string,
+  customerCode: string,
   timePeriod: string
 ) => {
-  const sql = `SELECT * FROM SOA_REMINDER WHERE CM_CODE = :cmCode AND TIME_PERIOD = :timePeriod`;
-  const result = await executeQuery(sql, { cmCode, timePeriod });
+  const sql = `SELECT ID as id, CM_CODE as customerCode, TIME_PERIOD as timePeriod, OFFICE_ID as officeId FROM SOA_REMINDER WHERE CM_CODE = :customerCode AND TIME_PERIOD = :timePeriod`;
+  const result = await executeQuery(sql, { customerCode, timePeriod });
   return result.rows ?? [];
 };
 

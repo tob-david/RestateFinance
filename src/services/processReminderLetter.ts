@@ -1,4 +1,6 @@
 import { findReminderByCustomerAndPeriod } from "../database/queries";
+
+import { SoaProcessingType } from "../utils/types";
 import {
   IProcessReminderResult,
   ISoaReminderRecord,
@@ -6,7 +8,7 @@ import {
   ICustomerModel,
   IBranchModel,
 } from "../utils/types/soa";
-import { SoaProcessingType } from "../utils/types";
+
 import { generateReminderLetter } from "./generateReminderLetter";
 
 export const processReminderLetter = async (
@@ -32,10 +34,7 @@ export const processReminderLetter = async (
   }
 
   const allDcNotesPaid: string[] = [];
-  console.log(`Processing ${allDcNotesPaid}`);
-
   let remindersSent = 0;
-  console.log(`Processing reminders sent ${remindersSent}`);
 
   // Step 2: Loop through each reminder
   for (const reminder of reminders) {
@@ -53,5 +52,6 @@ export const processReminderLetter = async (
       }
     }
   }
+
   return { processed: true, remindersSent, dcNotesPaid: allDcNotesPaid };
 };

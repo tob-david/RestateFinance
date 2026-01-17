@@ -43,7 +43,7 @@ export interface ICustomerModel {
 }
 
 export interface IBranchModel {
-  code: string;
+  office_code: string;
   name: string;
 }
 
@@ -148,10 +148,10 @@ export interface IEmailTemplateModel {
 }
 
 export interface ISoaReminderRecord {
-  ID: string;
-  CM_CODE: string;
-  TIME_PERIOD: string;
-  OFFICE_ID: string;
+  id: string;
+  customerCode: string;
+  timePeriod: string;
+  officeId: string;
 }
 
 export interface IProcessReminderResult {
