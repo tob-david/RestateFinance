@@ -1,9 +1,6 @@
 import { executeQuery } from "../config";
 import { ICustomerModel } from "../../utils/types";
 
-/**
- * Find all accounts (customers with IS_CUSTOMER = 'N')
- */
 export const findAllAccounts = async () => {
   const sQuery = await executeQuery(
     `SELECT CM_CODE AS "cm_code", CM_NAME AS "cm_name" FROM MASTER_CM WHERE IS_CUSTOMER = 'N' AND ROWNUM <= 5`
@@ -12,9 +9,6 @@ export const findAllAccounts = async () => {
   return sQuery;
 };
 
-/**
- * Find customer by ID
- */
 export const findCustomerById = async (
   customerId: string
 ): Promise<ICustomerModel | null> => {
@@ -24,9 +18,6 @@ export const findCustomerById = async (
   return (result.rows?.[0] as ICustomerModel) ?? null;
 };
 
-/**
- * Find customer emails by customer code and optionally office code
- */
 export const findCustomerEmails = async (
   cmCode: string,
   officeCode?: string | null
