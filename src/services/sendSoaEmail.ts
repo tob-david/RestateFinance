@@ -1,8 +1,8 @@
 import { completePhase, insertPhase } from "../database/queries";
 
 import { sendEmail } from "../utils/email";
+import { generateSoaEmailHtml } from "../utils/report/email";
 import { IEmailMessage } from "../utils/types";
-import { generateSoaEmailHtml } from "../utils/report";
 import {
   SoaProcessingPhase,
   ICustomerModel,
@@ -15,15 +15,15 @@ export const sendSoaEmail = async (
   excelFile: IFileData,
   pdfFile: IFileData,
   testMode: boolean,
-  jobId: string
+  jobId: string,
 ): Promise<boolean> => {
   const asAtDate = new Date();
 
   // Generate email HTML
   const emailHtml = await generateSoaEmailHtml({
     customerName: customer.fullName,
+    virtualAccount: customer.virtualAccount || "-",
     asAtDate: asAtDate,
-    virtualAccount: "12345678910101212",
   });
 
   // In testMode, always use provided email; otherwise use customer email or fallback

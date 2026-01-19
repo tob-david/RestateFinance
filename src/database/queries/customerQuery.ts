@@ -12,8 +12,16 @@ export const findAllAccounts = async () => {
 export const findCustomerById = async (
   customerId: string
 ): Promise<ICustomerModel | null> => {
-  const sQuery = `SELECT CM_CODE AS "code", CM_FULLNAME AS "fullName", ACTING_CODE AS "actingCode", EMAIL AS "email"
-               FROM MASTER_CM WHERE CM_CODE = :customerId`;
+  const sQuery = `
+    SELECT 
+      CM_CODE AS "code", 
+      CM_FULLNAME AS "fullName", 
+      ACTING_CODE AS "actingCode", 
+      EMAIL AS "email",
+      VIRTUAL_ACC AS "virtualAccount"
+    FROM MASTER_CM 
+    WHERE CM_CODE = :customerId
+  `;
   const result = await executeQuery(sQuery, { customerId });
   return (result.rows?.[0] as ICustomerModel) ?? null;
 };

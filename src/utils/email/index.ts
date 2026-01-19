@@ -5,4 +5,4 @@ export { getGraphClient } from "./graphClient";
 export { sendEmail } from "./sender";
 
 // Re-export types for convenience
-export type { EmailMessage, EmailAttachment } from "../types/email";
+export type { IEmailMessage, IEmailAttachment } from "../types/email";

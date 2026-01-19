@@ -1,9 +1,9 @@
-import { EmailAttachment, sendEmail } from "../utils/email";
+import { IEmailAttachment, sendEmail } from "../utils/email";
 import {
   generateReminderEmailHtml,
   getReminderEmailSubject,
   ReminderEmailData,
-} from "../utils/report";
+} from "../utils/report/email";
 import { ICustomerModel } from "../utils/types/soa";
 
 export const sendReminderEmail = async (params: {
@@ -39,7 +39,7 @@ export const sendReminderEmail = async (params: {
   const subject = getReminderEmailSubject(reminderType, customer.fullName);
   const recipient = testMode ? "gerardus.david@tob-ins.com" : toEmail;
   const recipients = recipient.split(",").map((r) => r.trim());
-  const attachments: EmailAttachment[] = [
+  const attachments: IEmailAttachment[] = [
     {
       name: excelFile.fileName,
       contentType: excelFile.contentType,

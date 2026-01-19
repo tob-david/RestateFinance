@@ -1,5 +1,5 @@
 import { getGraphClient } from "./graphClient";
-import { EmailMessage, EmailAttachment } from "../types/email";
+import { IEmailMessage, IEmailAttachment } from "../types/email";
 
 /**
  * Format email recipients for Graph API
@@ -11,7 +11,7 @@ function formatRecipients(emails: string[]) {
 /**
  * Format attachments for Graph API
  */
-function formatAttachments(attachments?: EmailAttachment[]) {
+function formatAttachments(attachments?: IEmailAttachment[]) {
   return (
     attachments?.map((att) => ({
       "@odata.type": "#microsoft.graph.fileAttachment",
@@ -32,7 +32,7 @@ function getSenderEmail(): string {
 /**
  * Send email using Microsoft Graph API
  */
-export async function sendEmail(message: EmailMessage): Promise<boolean> {
+export async function sendEmail(message: IEmailMessage): Promise<boolean> {
   const client = getGraphClient();
   const senderEmail = getSenderEmail();
 

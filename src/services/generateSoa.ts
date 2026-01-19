@@ -8,13 +8,12 @@ import {
 import {
   IStatementOfAccountModel,
   SoaProcessingPhase,
-  defaultUserCode,
   ICustomerModel,
 } from "../utils/types/soa";
 
-import { generateCollectionPdf, generateSoaExcel } from "../utils/report";
-
 import { uploadFile } from "../utils/storage";
+import { generateSoaExcel } from "../utils/report/generators";
+import { generateCollectionPdf } from "../utils/report/soa/soaReport";
 
 export const generateSoa = async (
   branchCode: string,
@@ -25,10 +24,10 @@ export const generateSoa = async (
   jobId: string,
   testMode: boolean,
   skipAgingFilter: boolean = false,
-  skipDcNoteCheck: boolean = false
+  skipDcNoteCheck: boolean = false,
 ): Promise<IStatementOfAccountModel[] | null> => {
   console.log(
-    `GenerateSOA started for ${customer.code}, Branch: ${branchCode}, COB: ${classOfBusiness}`
+    `GenerateSOA started for ${customer.code}, Branch: ${branchCode}, COB: ${classOfBusiness}`,
   );
 
   // ========== Phase: Get SOA Data ==========
@@ -46,18 +45,18 @@ export const generateSoa = async (
     customer.code,
     accountName,
     toDateObj,
-    defaultUserCode
+    "adm",
   );
 
   // Filter by aging >= 60 days (skip if skipAgingFilter is true)
   if (!skipAgingFilter) {
     soaList = soaList.filter((soa) => parseInt(soa.aging) >= 60);
     console.log(
-      `Filtered to ${soaList.length} SOA records with aging >= 60 days`
+      `Filtered to ${soaList.length} SOA records with aging >= 60 days`,
     );
   } else {
     console.log(
-      `Skip aging filter enabled - keeping all ${soaList.length} records`
+      `Skip aging filter enabled - keeping all ${soaList.length} records`,
     );
   }
 
@@ -85,8 +84,8 @@ export const generateSoa = async (
     newDcNotes = dcNotes.filter(
       (note) =>
         !existingDcNotes.some(
-          (existing) => existing.toLowerCase() === note.toLowerCase()
-        )
+          (existing) => existing.toLowerCase() === note.toLowerCase(),
+        ),
     );
 
     if (newDcNotes.length === 0) {
@@ -97,18 +96,18 @@ export const generateSoa = async (
   } else {
     newDcNotes = dcNotes;
     console.log(
-      `Skip DC note check enabled - processing all ${newDcNotes.length} DC notes`
+      `Skip DC note check enabled - processing all ${newDcNotes.length} DC notes`,
     );
   }
 
   // Filter soaList to only include new DC notes
   soaList = soaList.filter((soa) =>
-    newDcNotes.includes(soa.debitAndCreditNoteNo)
+    newDcNotes.includes(soa.debitAndCreditNoteNo),
   );
 
   if (soaList.length === 0) {
     console.log(
-      `Skipping ${customer.code}: No matching SOA records after filter`
+      `Skipping ${customer.code}: No matching SOA records after filter`,
     );
     return null;
   }
@@ -123,12 +122,10 @@ export const generateSoa = async (
   const dateStr = toDateObj.toISOString().split("T")[0];
 
   // Generate Excel file
-  const excelFile = await generateSoaExcel(
-    soaList,
-    customer.code,
-    dateStr,
-    branchCode
-  );
+  const excelFile = await generateSoaExcel({
+    soaData: soaList,
+    customerId: customer.code,
+  });
   console.log(`Generated Excel: ${excelFile.fileName}`);
 
   // Generate PDF file
@@ -136,7 +133,7 @@ export const generateSoa = async (
     customer.code,
     customer.fullName,
     dateStr,
-    "" // virtualAccount - will be added later if needed
+    customer.virtualAccount || "-",
   );
   console.log(`Generated PDF: ${pdfFile.fileName}`);
 

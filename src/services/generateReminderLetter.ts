@@ -8,8 +8,9 @@ import {
   insertPhase,
 } from "../database/queries";
 
-import { generateCollectionPdf, generateSoaExcel } from "../utils/report";
-import { generateLetterNo } from "../utils/report/letterNoGenerator";
+import { sendReminderEmail } from "./sendReminderEmail";
+
+import { generateLetterNo } from "../utils/report/generators/letterNoGenerator";
 import { uploadFile } from "../utils/storage";
 import {
   IGenerateReminderResult,
@@ -17,20 +18,26 @@ import {
   ISoaProcessingItem,
   SoaProcessingType,
   ISoaReminderRecord,
-  defaultUserCode,
   ICustomerModel,
   IBranchModel,
 } from "../utils/types/soa";
+import { generateSoaExcel } from "../utils/report/generators/generateSoaExcel";
+import { generateCollectionPdf } from "../utils/report/soa/soaReport";
 
-import { sendReminderEmail } from "./sendReminderEmail";
+interface GenerateReminderLetterParams {
+  customer: ICustomerModel;
+  branches: IBranchModel[];
+  reminder: ISoaReminderRecord;
+  item: ISoaProcessingItem;
+}
 
 export const generateReminderLetter = async (
-  customer: ICustomerModel,
-  branches: IBranchModel[],
-  reminder: ISoaReminderRecord,
-  item: ISoaProcessingItem
+  params: GenerateReminderLetterParams,
 ): Promise<IGenerateReminderResult | null> => {
+  const { customer, branches, reminder, item } = params;
   const dateNow = new Date();
+  const defaultUser = "adm";
+
   const branchCode = reminder.officeId || "ALL";
   const branchName =
     branchCode !== "ALL"
@@ -47,7 +54,7 @@ export const generateReminderLetter = async (
   // Skip conditions
   if (item.processingType === SoaProcessingType.SOA) {
     console.log(
-      `Skipping ${customer.code}: Type is SOA but has existing reminders`
+      `Skipping ${customer.code}: Type is SOA but has existing reminders`,
     );
     return null;
   }
@@ -68,12 +75,13 @@ export const generateReminderLetter = async (
   // Step 3: Get email recipients
   const emails = await findCustomerEmails(customer.code, branchCode);
   // const toEmail = emails.length > 0 ? emails.join(",") : "finance@tob-ins.com";
-  const toEmail = "gerardus.david@tob-ins.com";
+  const toEmail = "gerardus.david@tob-ins.com"; // for development
 
   // Step 4: Get SOA data (Phase: GetSoa)
   await insertPhase(item.jobId!, SoaProcessingPhase.GetSoa);
   const toDateObj = new Date(item.toDate * 1000);
 
+  // next using parquet file to get soa data
   const accountName = ["DID", "AGS"].includes(customer.actingCode)
     ? customer.fullName
     : null;
@@ -83,9 +91,8 @@ export const generateReminderLetter = async (
     customer.code,
     accountName,
     toDateObj,
-    defaultUserCode
+    defaultUser,
   );
-
   await completePhase(item.jobId!, SoaProcessingPhase.GetSoa);
   if (soaList.length === 0) return null;
 
@@ -94,11 +101,11 @@ export const generateReminderLetter = async (
   const soaDcNotes = soaList.map((s) => s.debitAndCreditNoteNo);
 
   const dcNotesPaid = existingDcNotes.filter(
-    (dc) => !soaDcNotes.some((soa) => soa.toLowerCase() === dc.toLowerCase())
+    (dc) => !soaDcNotes.some((soa) => soa.toLowerCase() === dc.toLowerCase()),
   );
-  const dcNotesUnpaid = existingDcNotes.filter((dc) =>
-    soaDcNotes.some((soa) => soa.toLowerCase() === dc.toLowerCase())
-  );
+  // const dcNotesUnpaid = existingDcNotes.filter((dc) =>
+  //   soaDcNotes.some((soa) => soa.toLowerCase() === dc.toLowerCase())
+  // );
 
   // Step 6: Generate Letter Number
   const letterNo = await generateLetterNo(reminderCount.toString(), dateNow);
@@ -108,27 +115,24 @@ export const generateReminderLetter = async (
     reminderCount.toString(),
     letterNo,
     latestLetter ? reminder.id : null,
-    dateNow
+    dateNow,
   );
 
   // Step 8: Generate Files (Phase: GeneratingFiles)
   await insertPhase(item.jobId!, SoaProcessingPhase.GeneratingFiles);
-  const dateStr = dateNow.toISOString().split("T")[0];
+  const dateToString = dateNow.toISOString().split("T")[0];
 
-  const excelFile = await generateSoaExcel(
-    soaList,
-    customer.code,
-    dateStr,
-    branchCode
-  );
+  const excelFile = await generateSoaExcel({
+    soaData: soaList,
+    customerId: customer.code,
+  });
 
   const pdfFile = await generateCollectionPdf(
     customer.code,
     customer.fullName,
-    dateStr,
-    ""
+    dateToString,
+    customer.virtualAccount || "-",
   );
-
   await completePhase(item.jobId!, SoaProcessingPhase.GeneratingFiles);
 
   // Step 9: Upload to Azure (Phase: UploadingToAzure)
@@ -137,13 +141,13 @@ export const generateReminderLetter = async (
   await uploadFile(
     { ...excelFile, fileName: `${prefix}${excelFile.fileName}` },
     customer.code,
-    "excel"
+    "excel",
   );
 
   await uploadFile(
     { ...pdfFile, fileName: `${prefix}${pdfFile.fileName}` },
     customer.code,
-    "pdf"
+    "pdf",
   );
 
   await completePhase(item.jobId!, SoaProcessingPhase.UploadingToAzure);

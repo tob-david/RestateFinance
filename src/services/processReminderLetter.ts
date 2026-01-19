@@ -1,4 +1,5 @@
 import { findReminderByCustomerAndPeriod } from "../database/queries";
+import { generateReminderLetter } from "./generateReminderLetter";
 
 import { SoaProcessingType } from "../utils/types";
 import {
@@ -9,13 +10,17 @@ import {
   IBranchModel,
 } from "../utils/types/soa";
 
-import { generateReminderLetter } from "./generateReminderLetter";
+interface ProcessReminderLetterParams {
+  customer: ICustomerModel;
+  branches: IBranchModel[];
+  item: ISoaProcessingItem;
+}
 
 export const processReminderLetter = async (
-  customer: ICustomerModel,
-  branches: IBranchModel[],
-  item: ISoaProcessingItem
+  params: ProcessReminderLetterParams
 ): Promise<IProcessReminderResult> => {
+  const { customer, branches, item } = params;
+
   console.log(
     `Starting reminder letter processing for ${customer.code}, Type: ${
       SoaProcessingType[item.processingType]
@@ -38,12 +43,12 @@ export const processReminderLetter = async (
 
   // Step 2: Loop through each reminder
   for (const reminder of reminders) {
-    const result = await generateReminderLetter(
+    const result = await generateReminderLetter({
       customer,
       branches,
       reminder,
-      item
-    );
+      item,
+    });
 
     if (result) {
       if (result.sent) remindersSent++;

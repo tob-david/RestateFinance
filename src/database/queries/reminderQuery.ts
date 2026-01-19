@@ -1,10 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
-import { executeQuery } from "../config";
 import { formatUUID } from "../../utils/formater";
+import { executeQuery } from "../config";
 
-/**
- * Find reminder by customer code and time period
- */
+// Find reminder by customer code and time period
 export const findReminderByCustomerAndPeriod = async (
   customerCode: string,
   timePeriod: string
