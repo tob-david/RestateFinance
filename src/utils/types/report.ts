@@ -14,6 +14,7 @@ export interface IExcelColumn {
   header: string;
   key: string;
   width?: number;
+  format?: "number" | "currency" | "date" | "text";
 }
 
 export interface IExcelSheetData {

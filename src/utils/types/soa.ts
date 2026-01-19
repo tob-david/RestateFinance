@@ -1,7 +1,6 @@
 import { IAccountRow } from "./customer";
 
 export const multiBranchCodes = ["DIC", "DIP", "DIG", "DID"];
-export const defaultUserCode = "adm";
 
 export enum SoaProcessingPhase {
   RetrievingCustomerData = "RetrievingCustomerData",
@@ -40,6 +39,7 @@ export interface ICustomerModel {
   fullName: string;
   actingCode: string;
   email?: string;
+  virtualAccount?: string;
 }
 
 export interface IBranchModel {

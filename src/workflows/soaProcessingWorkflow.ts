@@ -152,11 +152,11 @@ export const soaProcessingWorkflow = restate.workflow({
             processingItem (customerId, timePeriod, processingDate, batchId, jobId, classOfBusiness, branch, toDate, maxRetries, processingType, testMode, skipAgingFilter, skipDcNoteCheck)
             */
             await ctx.run("process-reminder", async () => {
-              return await processReminderLetter(
-                customerData,
-                branchesForReminder,
-                processingItem
-              );
+              return await processReminderLetter({
+                customer: customerData,
+                branches: branchesForReminder,
+                item: processingItem,
+              });
             });
           } else {
             // ========== PROCESS NEW SOA ==========
@@ -320,11 +320,11 @@ export const soaProcessingWorkflow = restate.workflow({
               await ctx.run(
                 `send-reminder-rl${currentReminderCount}`,
                 async () => {
-                  return await processReminderLetter(
-                    customerData,
-                    branchesForReminder,
-                    reminderProcessingItem
-                  );
+                  return await processReminderLetter({
+                    customer: customerData,
+                    branches: branchesForReminder,
+                    item: reminderProcessingItem,
+                  });
                 }
               );
 
