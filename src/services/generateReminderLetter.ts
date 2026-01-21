@@ -82,17 +82,19 @@ export const generateReminderLetter = async (
   const toDateObj = new Date(item.toDate * 1000);
 
   // next using parquet file to get soa data
-  const accountName = ["DID", "AGS"].includes(customer.actingCode)
+  const actingCodes = ["DID", "AGS"].includes(customer.actingCode)
     ? customer.fullName
     : null;
+
   const soaList = await fetchSoaFromProcedure(
     branchCode,
     item.classOfBusiness,
     customer.code,
-    accountName,
+    actingCodes,
     toDateObj,
     defaultUser,
   );
+
   await completePhase(item.jobId!, SoaProcessingPhase.GetSoa);
   if (soaList.length === 0) return null;
 

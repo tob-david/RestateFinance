@@ -6,21 +6,9 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { renderTemplate } from "../core/templateEngine";
+import { IReminderEmailData } from "../types";
 
 const TEMPLATES_DIR = join(__dirname, "../templates");
-
-// ========== Types ==========
-
-export interface IReminderEmailData {
-  customerName: string;
-  asAtDate: Date;
-  virtualAccount: string;
-  letterNo: string;
-  previousLetterNo?: string;
-  previousLetterDate?: Date;
-}
-
-// ========== Helpers ==========
 
 /**
  * Format date to Indonesian format

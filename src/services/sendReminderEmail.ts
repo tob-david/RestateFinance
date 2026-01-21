@@ -1,8 +1,8 @@
 import { IEmailAttachment, sendEmail } from "../utils/email";
+import { IReminderEmailData } from "../utils/report/types";
 import {
   generateReminderEmailHtml,
   getReminderEmailSubject,
-  ReminderEmailData,
 } from "../utils/report/email";
 import { ICustomerModel } from "../utils/types/soa";
 
@@ -27,10 +27,10 @@ export const sendReminderEmail = async (params: {
     pdfFile,
   } = params;
 
-  const emailData: ReminderEmailData = {
+  const emailData: IReminderEmailData = {
     customerName: customer.fullName,
     asAtDate: new Date(),
-    virtualAccount: "",
+    virtualAccount: customer.virtualAccount || "-",
     letterNo,
     previousLetterNo,
   };
