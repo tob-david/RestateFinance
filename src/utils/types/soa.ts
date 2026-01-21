@@ -1,23 +1,3 @@
-import { IAccountRow } from "./customer";
-
-export const multiBranchCodes = ["DIC", "DIP", "DIG", "DID"];
-
-export enum SoaProcessingPhase {
-  RetrievingCustomerData = "RetrievingCustomerData",
-  CheckingSoaHistory = "CheckingSoaHistory",
-  GetSoa = "GetSoa",
-  GeneratingFiles = "GeneratingFiles",
-  UploadingToAzure = "UploadingToAzure",
-  SendingEmail = "SendingEmail",
-}
-
-export enum SoaProcessingType {
-  SOA = 1,
-  RL1 = 2,
-  RL2 = 3,
-  RL3 = 4,
-}
-
 export interface ISoaProcessingItem {
   customerId: string;
   timePeriod: string;
@@ -64,65 +44,46 @@ export interface ISoaReminderLetterModel {
 }
 
 export interface IStatementOfAccountModel {
-  // DC Note identification
-  debitAndCreditNoteNo: string; // DC_NOTE
-
-  // Branch and Policy info
-  branch: string; // BRANCH
-  policyNo: string; // POLICY_NO
-  policyEndNo: string; // POL_END_NO
-  contractNo: string; // CONTRACT_NO
-  plateNo: string; // PLAT_NO
-  coInFacRefNo: string; // CO_IN_FAC_REF_NO (Batch No)
-  fireConjunctionPolicy: string; // FIRE_CONJUNCTION_POL
-
-  // Business classification
-  lob: string; // LOB
-  sourceOfBusiness: string; // SOB
-
-  // Account and customer info
-  accountName: string; // DC_ACCOUNT_FULL_NAME
-  insuredName: string; // INSURED_NAME
-  distributionName: string; // DISTRIBUTION_NAME
-  distributionNameSecond: string; // DISTRIBUTION_NAME2
-  qualitateQuaName: string; // QQ_NAME
-
-  // Dates
-  endEffDate: Date; // END_EFF_DATE
-  endExpDate: Date; // END_EXP_DATE
-  postDate: Date; // POST_DATE
-  dueDate: Date; // DUE_DATE
-
-  // Aging and currency
-  aging: string; // AGING
-  currency: string; // CURR
-  exchangeRate: number; // EXCH_RATE
-
-  // Endorsement info
-  endReason: string; // END_REASON
-  actingCode: string; // ACTING_CODE
-
-  // Financial values
-  totalSumInsured: number; // TSI
-  grossPremium: number; // GP
-  discount: number; // DISC
-  commission: number; // COMM
-  ppn: number; // PPN
-  pph21: number; // PPH21
-  pph23: number; // PPH23
-  cost: number; // COST
-  stmp: number; // STMP
-  netPremium: number; // NETT_PREMIUM
-  netPremiumIdr: number; // Calculated: NetPremium * ExchangeRate
-
-  // Installment info
-  installment: string; // INST_NO
-  origAmount: number; // ORIG_AMOUNT
-
-  // Legacy fields for compatibility
+  debitAndCreditNoteNo: string;
+  branch: string;
+  policyNo: string;
+  policyEndNo: string;
+  contractNo: string;
+  plateNo: string;
+  coInFacRefNo: string;
+  fireConjunctionPolicy: string;
+  lob: string;
+  sourceOfBusiness: string;
+  accountName: string;
+  insuredName: string;
+  distributionName: string;
+  distributionNameSecond: string;
+  qualitateQuaName: string;
+  endEffDate: Date;
+  endExpDate: Date;
+  postDate: Date;
+  dueDate: Date;
+  aging: string;
+  currency: string;
+  exchangeRate: number;
+  endReason: string;
+  actingCode: string;
+  totalSumInsured: number;
+  grossPremium: number;
+  discount: number;
+  commission: number;
+  ppn: number;
+  pph21: number;
+  pph23: number;
+  cost: number;
+  stmp: number;
+  netPremium: number;
+  netPremiumIdr: number;
+  installment: string;
+  origAmount: number;
   dcNoteNo?: string;
   classOfBusiness?: string;
-  customerCode?: string;
+  customerCode: string;
   officeCode?: string;
 }
 
@@ -165,3 +126,60 @@ export interface IGenerateReminderResult {
   dcNotesPaid: string[];
   letterNo?: string;
 }
+
+export const multiBranchCodes = ["DIC", "DIP", "DIG", "DID"];
+
+export enum SoaProcessingPhase {
+  RetrievingCustomerData = "RetrievingCustomerData",
+  CheckingSoaHistory = "CheckingSoaHistory",
+  GetSoa = "GetSoa",
+  GeneratingFiles = "GeneratingFiles",
+  UploadingToAzure = "UploadingToAzure",
+  SendingEmail = "SendingEmail",
+}
+
+export enum SoaProcessingType {
+  SOA = 1,
+  RL1 = 2,
+  RL2 = 3,
+  RL3 = 4,
+}
+
+export const column = {
+  BRANCH: 0,
+  POLICY_NO: 1,
+  POL_END_NO: 2,
+  CONTRACT_NO: 3,
+  PLAT_NO: 4,
+  CO_IN_FAC_REF_NO: 5,
+  FIRE_CONJUNCTION_POL: 6,
+  LOB: 7,
+  SOB: 8,
+  DC_ACCOUNT_FULL_NAME: 9,
+  INSURED_NAME: 10,
+  DISTRIBUTION_NAME: 11,
+  DISTRIBUTION_NAME2: 12,
+  QQ_NAME: 13,
+  END_EFF_DATE: 14,
+  END_EXP_DATE: 15,
+  POST_DATE: 16,
+  AGING: 17,
+  CURR: 18,
+  EXCH_RATE: 19,
+  END_REASON: 20,
+  ACTING_CODE: 21,
+  TSI: 22,
+  GP: 23,
+  DISC: 24,
+  COMM: 25,
+  PPN: 26,
+  PPH21: 27,
+  PPH23: 28,
+  COST: 29,
+  STMP: 30,
+  NETT_PREMIUM: 31,
+  INST_NO: 32,
+  DUE_DATE: 33,
+  DC_NOTE: 34,
+  ORIG_AMOUNT: 35,
+};

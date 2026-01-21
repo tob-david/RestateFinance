@@ -5,7 +5,11 @@ export interface IOracleStreamOptions {
 
 export interface ISoaPipelineResult {
   success: boolean;
-  rowCount: number;
-  localPath: string;
   duration: string;
+}
+
+export interface IPartitionedFile {
+  accountCode?: string;
+  rowCount: number;
+  filePath: string;
 }
