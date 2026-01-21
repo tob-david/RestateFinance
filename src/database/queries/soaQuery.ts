@@ -1,6 +1,6 @@
 import { callProcedure } from "../config";
 import { IStatementOfAccountModel } from "../../utils/types/soa";
-import { transformSoaRow } from "../../streaming/transformers/soaTransformer";
+import { transformSoaRow } from "../../streaming/transform/soaTransformer";
 
 /**
  * Fetch SOA data from stored procedure
@@ -12,7 +12,7 @@ export const fetchSoaFromProcedure = async (
   accountCode: string,
   accountName: string | null,
   toDate: Date,
-  userCode: string
+  userCode: string,
 ): Promise<IStatementOfAccountModel[]> => {
   const rows = await callProcedure("PACKAGE_RPT_FI_SOA.get_rpt_fi_soa_new", {
     p_office: officeCode,

@@ -3,14 +3,21 @@ import { ICustomerModel } from "../../utils/types";
 
 export const findAllAccounts = async () => {
   const sQuery = await executeQuery(
-    `SELECT CM_CODE AS "cm_code", CM_NAME AS "cm_name" FROM MASTER_CM WHERE IS_CUSTOMER = 'N' AND ROWNUM <= 5`
+    `SELECT 
+      CM_CODE AS "code", 
+      CM_NAME AS "name",
+      CM_FULLNAME AS "fullName",
+      ACTING_CODE AS "actingCode"
+    FROM MASTER_CM 
+    WHERE IS_CUSTOMER = 'N' 
+    AND ROWNUM <= 5`,
   );
 
-  return sQuery;
+  return sQuery.rows || [];
 };
 
 export const findCustomerById = async (
-  customerId: string
+  customerId: string,
 ): Promise<ICustomerModel | null> => {
   const sQuery = `
     SELECT 
@@ -28,7 +35,7 @@ export const findCustomerById = async (
 
 export const findCustomerEmails = async (
   cmCode: string,
-  officeCode?: string | null
+  officeCode?: string | null,
 ): Promise<string[]> => {
   let sql = `
     SELECT DISTINCT EMAIL 
