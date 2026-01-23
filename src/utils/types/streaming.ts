@@ -9,7 +9,7 @@ export interface ISoaPipelineResult {
 }
 
 export interface IPartitionedFile {
-  accountCode?: string;
+  distributionCode?: string;
   rowCount: number;
   filePath: string;
 }

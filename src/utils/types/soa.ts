@@ -85,6 +85,7 @@ export interface IStatementOfAccountModel {
   classOfBusiness?: string;
   customerCode: string;
   officeCode?: string;
+  distributionCode?: string;
 }
 
 export interface IFileData {
@@ -182,4 +183,5 @@ export const column = {
   DUE_DATE: 33,
   DC_NOTE: 34,
   ORIG_AMOUNT: 35,
+  DISTRIBUTION_CODE: 36,
 };

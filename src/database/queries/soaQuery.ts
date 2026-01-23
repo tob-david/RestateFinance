@@ -2,10 +2,6 @@ import { callProcedure } from "../config";
 import { IStatementOfAccountModel } from "../../utils/types/soa";
 import { transformSoaRow } from "../../streaming/transform/soaTransformer";
 
-/**
- * Fetch SOA data from stored procedure
- * Uses PACKAGE_RPT_FI_SOA.get_rpt_fi_soa_new which returns cursor with all SOA columns
- */
 export const fetchSoaFromProcedure = async (
   officeCode: string,
   classOfBusiness: string,
@@ -23,7 +19,6 @@ export const fetchSoaFromProcedure = async (
     p_userid: userCode,
   });
 
-  // Use the transformer to map Oracle cursor columns to IStatementOfAccountModel
   return rows
     .map((row: any[]) => transformSoaRow(row))
     .filter((row): row is IStatementOfAccountModel => row !== null);

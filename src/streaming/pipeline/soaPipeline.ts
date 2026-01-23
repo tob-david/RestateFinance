@@ -9,17 +9,16 @@ import { formatDuration } from "../../utils/formater";
 
 export async function generateSoaPipeline(
   asAtDate: Date,
-  accountName: string,
 ): Promise<ISoaPipelineResult> {
   const startTime = Date.now();
   console.log(`Starting SOA pipeline`);
 
   // Create pipeline: Reader → Transformer
-  const oracleStream = streamSoaData(asAtDate, accountName); // get all data from package
+  const oracleStream = streamSoaData(asAtDate); // get all data from package
   const transformedStream = transformSoaStream(oracleStream); // transform data to SOA model
 
   // Write to Parquet
-  await writeToParquet(transformedStream); // write to parquet file by account code
+  await writeToParquet(transformedStream); // write to parquet file by distribution code
 
   const endTime = Date.now();
   const duration = formatDuration(endTime - startTime);

@@ -21,6 +21,8 @@ export interface IGetSoaBatchStatus {
 }
 
 export interface IAccountRow {
-  cm_code: string;
-  cm_name: string;
+  code: string;
+  name: string;
+  fullName: string;
+  actingCode: string;
 }

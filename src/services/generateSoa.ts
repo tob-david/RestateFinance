@@ -14,6 +14,7 @@ import {
 import { uploadFile } from "../utils/storage";
 import { generateSoaExcel } from "../utils/report/generators";
 import { generateCollectionPdf } from "../utils/report/soa/soaReport";
+import { readSoaParquet } from "../parquet/readers";
 
 export const generateSoa = async (
   branchCode: string,
@@ -33,20 +34,24 @@ export const generateSoa = async (
   // ========== Phase: Get SOA Data ==========
   await insertPhase(jobId, SoaProcessingPhase.GetSoa);
   console.log(`Getting SOA data for ${customer.code}`);
+  const fullName = customer.fullName.replace(/\s+/g, "");
 
   const toDateObj = new Date(toDate * 1000);
-  const accountName = ["DID", "AGS"].includes(customer.actingCode)
-    ? customer.fullName
-    : null;
+  let soaList = await readSoaParquet(fullName);
 
-  let soaList = await fetchSoaFromProcedure(
-    branchCode,
-    classOfBusiness,
-    customer.code,
-    accountName,
-    toDateObj,
-    "adm",
-  );
+  // const toDateObj = new Date(toDate * 1000);
+  // const accountName = ["DID", "AGS"].includes(customer.actingCode)
+  //   ? customer.fullName
+  //   : null;
+
+  // let soaList = await fetchSoaFromProcedure(
+  //   branchCode,
+  //   classOfBusiness,
+  //   customer.code,
+  //   accountName,
+  //   toDateObj,
+  //   "adm",
+  // );
 
   // Filter by aging >= 60 days (skip if skipAgingFilter is true)
   if (!skipAgingFilter) {
@@ -70,7 +75,7 @@ export const generateSoa = async (
   // Extract DC notes
   const dcNotes = soaList
     .flatMap((soa) => soa.debitAndCreditNoteNo?.split(",") || [])
-    .filter((note, idx, arr) => arr.indexOf(note) === idx); // distinct
+    .filter((note, idx, arr) => arr.indexOf(note) === idx);
 
   console.log(`Extracted ${dcNotes.length} unique DC notes`);
 

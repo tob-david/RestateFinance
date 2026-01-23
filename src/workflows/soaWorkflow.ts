@@ -42,11 +42,11 @@ export const soaWorkflow = restate.workflow({
         return await findAllAccounts();
       });
 
-      if (!customers?.rows || customers.rows.length === 0) {
+      if (!customers || customers.length === 0) {
         throw new Error("No customers found");
       }
 
-      let customerRows = (customers.rows ?? []) as IAccountRow[];
+      let customerRows = (customers ?? []) as IAccountRow[];
       const totalCustomers = customerRows.length;
 
       // Create Batch
@@ -64,12 +64,13 @@ export const soaWorkflow = restate.workflow({
       });
 
       for (const customer of customerRows) {
-        const customerId = customer.cm_code;
+        const customerId = customer.code;
+        ctx.console.log(`Processing customer: ${customerId}`);
 
         ctx
           .workflowSendClient<SoaProcessingWorkflow>(
             soaProcessingWorkflow,
-            customerId
+            customerId,
           )
           .run({
             customerId,

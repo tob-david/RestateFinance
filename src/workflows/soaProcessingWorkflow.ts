@@ -59,7 +59,6 @@ export const soaProcessingWorkflow = restate.workflow({
             batchId,
             customerId,
           )) as IGetSoaJob | null;
-
           const newJobId = createHash("md5")
             .update(batchId + customerId)
             .digest("hex")
@@ -278,10 +277,8 @@ export const soaProcessingWorkflow = restate.workflow({
             while (currentReminderCount < maxReminders) {
               ctx.console.log(`Waiting for RL${currentReminderCount + 1}...`);
 
-              // 🔥 Durable sleep - workflow survives restarts!
               await ctx.sleep(reminderInterval);
 
-              // Check if still has outstanding
               const outstandingReminders = await ctx.run(
                 `check-payment-rl${currentReminderCount + 1}`,
                 async () => {

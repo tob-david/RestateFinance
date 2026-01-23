@@ -21,21 +21,20 @@ export async function writeToParquet(
   const files: IPartitionedFile[] = [];
   let totalRowCount = 0;
 
-  for (const [accountCode, rows] of datasAccount) {
-    const sanitizedName = accountCode?.replace(/[<>:"/\\|?*]/g, "_").trim();
-    const fileName = `soa_${sanitizedName}.parquet`;
+  for (const [distributionCode, rows] of datasAccount) {
+    const fileName = `soa_${distributionCode}.parquet`;
     const localPath = path.join(process.cwd(), "data");
     const filePath = path.join(localPath, fileName);
 
     await writeSoaParquet(rows, filePath);
 
     files.push({
-      accountCode,
+      distributionCode,
       rowCount: rows.length,
       filePath,
     });
 
     totalRowCount += rows.length;
-    console.log(`Wrote ${rows.length} rows for account ${accountCode}`);
+    console.log(`Wrote ${rows.length} rows for account ${distributionCode}`);
   }
 }

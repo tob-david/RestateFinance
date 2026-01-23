@@ -6,7 +6,7 @@ import {
 } from "../../utils/helper/typeTransform";
 
 export function transformSoaRow(row: any[]): IStatementOfAccountModel | null {
-  if (!row || row.length < 35) return null;
+  if (!row || row.length < 37) return null;
 
   const netPremium = parseNumber(row[column.NETT_PREMIUM]);
   const exchangeRate = parseNumber(row[column.EXCH_RATE]) || 1;
@@ -56,5 +56,6 @@ export function transformSoaRow(row: any[]): IStatementOfAccountModel | null {
     classOfBusiness: parseString(row[column.LOB]),
     customerCode: parseString(row[column.DISTRIBUTION_NAME]),
     officeCode: parseString(row[column.BRANCH]),
+    distributionCode: parseString(row[column.DISTRIBUTION_CODE]),
   };
 }

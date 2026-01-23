@@ -23,6 +23,7 @@ import {
 } from "../utils/types/soa";
 import { generateSoaExcel } from "../utils/report/generators/generateSoaExcel";
 import { generateCollectionPdf } from "../utils/report/soa/soaReport";
+import { readSoaParquet } from "../parquet";
 
 interface GenerateReminderLetterParams {
   customer: ICustomerModel;
@@ -80,20 +81,23 @@ export const generateReminderLetter = async (
   // Step 4: Get SOA data (Phase: GetSoa)
   await insertPhase(item.jobId!, SoaProcessingPhase.GetSoa);
   const toDateObj = new Date(item.toDate * 1000);
+  const fullName = customer.fullName.replace(/\s+/g, "");
+
+  let soaList = await readSoaParquet(fullName);
 
   // next using parquet file to get soa data
-  const actingCodes = ["DID", "AGS"].includes(customer.actingCode)
-    ? customer.fullName
-    : null;
+  // const actingCodes = ["DID", "AGS"].includes(customer.actingCode)
+  //   ? customer.fullName
+  //   : null;
 
-  const soaList = await fetchSoaFromProcedure(
-    branchCode,
-    item.classOfBusiness,
-    customer.code,
-    actingCodes,
-    toDateObj,
-    defaultUser,
-  );
+  // const soaList = await fetchSoaFromProcedure(
+  //   branchCode,
+  //   item.classOfBusiness,
+  //   customer.code,
+  //   actingCodes,
+  //   toDateObj,
+  //   defaultUser,
+  // );
 
   await completePhase(item.jobId!, SoaProcessingPhase.GetSoa);
   if (soaList.length === 0) return null;
